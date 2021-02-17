@@ -1,0 +1,39 @@
+ADNI1:
+    DXCURREN
+        1=NL;
+        2=MCI;
+        3=AD
+
+ADNIGO/2:
+    DXCHANGE
+        1=Stable: NL to NL;
+        2=Stable: MCI to MCI;
+        3=Stable: Dementia to Dementia;
+
+        4=Conversion: NL to MCI;
+        5=Conversion: MCI to Dementia;
+        6=Conversion: NL to Dementia;
+
+        7=Reversion: MCI to NL;
+        8=Reversion: Dementia to MCI;
+        9=Reversion: Dementia to NL
+
+ADNI3:
+    DIAGNOSIS
+        1=CN;
+        2=MCI;
+        3=Dementia
+
+CN: Cognitively Normal
+NL: NormaL???
+¿Podemos asumir CN = NL?
+
+MCI: Mild Cognitive Impairment
+
+AD: Alzheimer's Disease
+Dementia
+¿Podemos asumir Dementia = Alzheimer?
+
+
+¿Toda la informacion que se necesita del WGS está en los ficheros descargados en formato PLINK?
+Los archivos PLINK ocupan poco, es sospechoso

@@ -127,3 +127,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# PyCharm
+.idea
+
+# ADNI data
+**.bed
+wgs_data
+diagnosis_data
