@@ -60,13 +60,23 @@ def generate_dataset(diagnostic_dict: dict, fam, bed):
     n_snps = bed.shape[0]
     y = []
     # Generate label data
+    # Only difference between Alzheimer and not alzheimer
     for test in range(n_wgs_samples):
         # Read iid from wgs data
         iid = fam.iat[test, 1]
         # Get diagnose corresponding to the iid
         last_diagnose = diagnostic_dict[iid]
-        y.append(last_diagnose)
+        has_alzheimer = False
+        if last_diagnose == 2 or last_diagnose == 1:
+            # Mild cognitive impairment simply considered not alzheimer
+            has_alzheimer = False
+        elif last_diagnose == 3:
+            has_alzheimer = True
+        else:
+            print("Error: diagnosis not recognized")
+        y.append(has_alzheimer)
     y = np.asarray(y)
+    y = y.reshape((n_wgs_samples, 1))
 
     # Generate features data
     x = np.asarray(bed)
@@ -74,5 +84,4 @@ def generate_dataset(diagnostic_dict: dict, fam, bed):
 
     # Normalize dataset values [0,1]
     x = (x - np.min(x)) / np.ptp(x)
-    y = (y - np.min(y)) / np.ptp(y)
     return x, y
