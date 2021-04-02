@@ -34,11 +34,11 @@ def read_diagnose(file_path: str = '../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv'
         if not math.isnan(diagnosis):
             diagnostic_dict[key] = diagnosis
     if verbose:
-        print_diagnostic_summary(diagnostic_dict)
+        print_diagnostic_dict_summary(diagnostic_dict)
     return diagnostic_dict
 
 
-def print_diagnostic_summary(diagnostic_dict: dict):
+def print_diagnostic_dict_summary(diagnostic_dict: dict):
     print(f"Number of diagnosed patients: {len(diagnostic_dict.items())}\n")
     n_NL = 0
     n_MCI = 0
@@ -67,18 +67,21 @@ def generate_dataset(diagnostic_dict: dict, fam, bed):
         # Get diagnose corresponding to the iid
         last_diagnose = diagnostic_dict[iid]
         has_alzheimer = False
-        if last_diagnose == 2 or last_diagnose == 1:
-            # Mild cognitive impairment simply considered not alzheimer
+        if last_diagnose == 1 or last_diagnose == 2:
+            # Mild cognitive impairment simply considered as not alzheimer
             has_alzheimer = False
         elif last_diagnose == 3:
             has_alzheimer = True
         else:
             print("Error: diagnosis not recognized")
         y.append(has_alzheimer)
+
     y = np.asarray(y)
     y = y.reshape((n_wgs_samples, 1))
 
     # Generate features data
+    # Replace NaN values (missing genotype)
+    bed = np.nan_to_num(bed, 1)
     x = np.asarray(bed)
     x = x.transpose((1, 0))
 
