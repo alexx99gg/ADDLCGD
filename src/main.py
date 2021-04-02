@@ -5,7 +5,7 @@ from tensorflow.python.keras.callbacks import EarlyStopping
 
 from read_data import *
 from train_data import *
-from utils import *
+from plot_utils import *
 
 diagnostic_dict = read_diagnose(file_path='../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv')
 
