@@ -61,30 +61,47 @@ def generate_dataset(diagnostic_dict: dict, fam, bed):
     y = []
     # Generate label data
     # Only difference between Alzheimer and not alzheimer
+    i = 0
+    i_to_keep = [True] * n_wgs_samples
     for test in range(n_wgs_samples):
         # Read iid from wgs data
         iid = fam.iat[test, 1]
         # Get diagnose corresponding to the iid
         last_diagnose = diagnostic_dict[iid]
-        has_alzheimer = False
-        if last_diagnose == 1 or last_diagnose == 2:
-            # Mild cognitive impairment simply considered as not alzheimer
-            has_alzheimer = False
+        has_alzheimer = -1
+        if last_diagnose == 1:
+            # Cognitive normal
+            has_alzheimer = 0
+            y.append(has_alzheimer)
+        elif last_diagnose == 2:
+            # Mild cognitive impairment
+            # Remove this from the datasets as the diagnose is not clear
+            i_to_keep[i] = False
+            n_wgs_samples -= 1
         elif last_diagnose == 3:
-            has_alzheimer = True
+            has_alzheimer = 1
+            y.append(has_alzheimer)
         else:
             print("Error: diagnosis not recognized")
-        y.append(has_alzheimer)
+            exit(1)
+        i += 1
 
     y = np.asarray(y)
     y = y.reshape((n_wgs_samples, 1))
 
     # Generate features data
-    # Replace NaN values (missing genotype)
-    bed = np.nan_to_num(bed, 1)
     x = np.asarray(bed)
     x = x.transpose((1, 0))
+    x = x[i_to_keep, :]
+    # Count NaN values
+    n_NaN = np.count_nonzero(np.isnan(x))
+    if n_NaN > 0:
+        print(f"Warning: number of missing genotypes is {n_NaN}\n")
+    # Remove NaN columns
+    x = x[:, ~np.isnan(x).any(axis=0)]
 
-    # Normalize dataset values [0,1]
-    x = (x - np.min(x)) / np.ptp(x)
+    # Normalize dataset values [0,1] by columns
+    # x = (x - x.min(0)) / x.ptp(0)
+    # x = 1 - x
+
     return x, y

@@ -28,9 +28,12 @@ def main(argv):
         IID = key
         last_diagnose = diagnostic_dict[key]
         # '1' = control, '2' = case, '-9'/'0'/non-numeric = missing data if case/control
-        if last_diagnose == 1 or last_diagnose == 2:
-            # Mild cognitive impairment simply considered as not alzheimer
+        if last_diagnose == 1:
+            # Cognitive normal
             out_file.write(f"{FID} {IID} {1}\n")
+        elif last_diagnose == 2:
+            # Mild cognitive impairment
+            out_file.write(f"{FID} {IID} {-9}\n")
         elif last_diagnose == 3:
             out_file.write(f"{FID} {IID} {2}\n")
         else:
