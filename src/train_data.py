@@ -20,35 +20,28 @@ def create_MLP_model(n_SNPs: int):
 
     # Dense Layer with 1024 outputs, ReLU as activation, L2 Regularization and He Initialization
     model.add(
-        layers.Dense(2 ** 10, activation='relu', kernel_regularizer='l2', kernel_initializer=initializers.he_normal))
+        layers.Dense(1024, activation='relu', kernel_regularizer='l2', kernel_initializer=initializers.he_normal))
     # Batch Normalization, Dropout Layer with 30% of inputs to drop
     model.add(layers.BatchNormalization())
     model.add(layers.Dropout(0.3))
 
     # Dense Layer with 512 outputs, ReLU as activation, L2 Regularization and He Initialization
     model.add(
-        layers.Dense(2 ** 9, activation='relu', kernel_regularizer='l2', kernel_initializer=initializers.he_normal))
+        layers.Dense(512, activation='relu', kernel_regularizer='l2', kernel_initializer=initializers.he_normal))
     # Batch Normalization, Dropout Layer with 30% of inputs to drop
     model.add(layers.BatchNormalization())
     model.add(layers.Dropout(0.3))
 
     # Dense Layer with 256 outputs, ReLU as activation, L2 Regularization and He Initialization
     model.add(
-        layers.Dense(2 ** 8, activation='relu', kernel_regularizer='l2', kernel_initializer=initializers.he_normal))
-    # Batch Normalization, Dropout Layer with 30% of inputs to drop
-    model.add(layers.BatchNormalization())
-    model.add(layers.Dropout(0.3))
-
-    # Dense Layer with 128 outputs, ReLU as activation, L2 Regularization and He Initialization
-    model.add(
-        layers.Dense(2 ** 7, activation='relu', kernel_regularizer='l2', kernel_initializer=initializers.he_normal))
+        layers.Dense(256, activation='relu', kernel_regularizer='l2', kernel_initializer=initializers.he_normal))
     # Batch Normalization, Dropout Layer with 30% of inputs to drop
     model.add(layers.BatchNormalization())
     model.add(layers.Dropout(0.3))
 
     # Dense Layer with 64 outputs, ReLU as activation, L2 Regularization and He Initialization
     model.add(
-        layers.Dense(2 ** 6, activation='relu', kernel_regularizer='l2', kernel_initializer=initializers.he_normal))
+        layers.Dense(64, activation='relu', kernel_regularizer='l2', kernel_initializer=initializers.he_normal))
     # Batch Normalization, Dropout Layer with 30% of inputs to drop
     model.add(layers.BatchNormalization())
     model.add(layers.Dropout(0.3))
