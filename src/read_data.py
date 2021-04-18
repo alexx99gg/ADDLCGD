@@ -55,14 +55,14 @@ def print_diagnostic_dict_summary(diagnostic_dict: dict):
           f"Number of AD patients: {n_AD}\n")
 
 
-def generate_dataset(diagnostic_dict: dict, fam, bed):
+def generate_dataset(diagnostic_dict: dict, bed, bim, fam, snp_list):
     n_wgs_samples = bed.shape[1]
     n_snps = bed.shape[0]
     y = []
     # Generate label data
-    # Only difference between Alzheimer and not alzheimer
+    # Keep only Alzheimer and cognitive normal patients (delete MCI patients)
+    samples_to_keep = [True] * n_wgs_samples
     i = 0
-    i_to_keep = [True] * n_wgs_samples
     for test in range(n_wgs_samples):
         # Read iid from wgs data
         iid = fam.iat[test, 1]
@@ -76,7 +76,7 @@ def generate_dataset(diagnostic_dict: dict, fam, bed):
         elif last_diagnose == 2:
             # Mild cognitive impairment
             # Remove this from the datasets as the diagnose is not clear
-            i_to_keep[i] = False
+            samples_to_keep[i] = False
             n_wgs_samples -= 1
         elif last_diagnose == 3:
             has_alzheimer = 1
@@ -85,23 +85,34 @@ def generate_dataset(diagnostic_dict: dict, fam, bed):
             print("Error: diagnosis not recognized")
             exit(1)
         i += 1
-
     y = np.asarray(y)
     y = y.reshape((n_wgs_samples, 1))
 
     # Generate features data
     x = np.asarray(bed)
     x = x.transpose((1, 0))
-    x = x[i_to_keep, :]
+    # Delete MCI patients sample
+    x = x[samples_to_keep, :]
+
+    # Keep SNPs in snp_list only
+    snps_to_keep = [False] * n_snps
+    snps_not_found = 0
+    for snp in snp_list:
+        index = bim[bim['snp'] == snp].index
+        if len(index) == 0:
+            snps_not_found += 1
+            continue
+        index = index[0]
+        snps_to_keep[index] = True
+    if snps_not_found > 0:
+        print(f"SNPs from keep list not found: {snps_not_found}")
+    x = x[:, snps_to_keep]
     # Count NaN values
     n_NaN = np.count_nonzero(np.isnan(x))
     if n_NaN > 0:
-        print(f"Warning: number of missing genotypes is {n_NaN}\n")
+        print(f"Warning: number of missing genotypes in samples: {n_NaN}\n")
     # Remove NaN columns
     x = x[:, ~np.isnan(x).any(axis=0)]
 
-    # Normalize dataset values [0,1] by columns
-    # x = (x - x.min(0)) / x.ptp(0)
-    # x = 1 - x
 
     return x, y
