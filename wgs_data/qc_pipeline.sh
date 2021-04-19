@@ -3,12 +3,15 @@
 # -------------------- Combine plink files --------------------
 # --chr 1-22: chromosome 1 to 22 (discard 23)
 # adni1 + adni2 + adnigo (as in the paper)
-plink --merge-list merge-list-adni1+2+go.txt --chr 1-22 --make-bed --out adni1+2+go
+plink --merge-list merge_list_adni_1_2_go.txt --make-bed --out merged/adni_1_2_go
 
-# adni1 + adni2 + adnigo + adni3
-plink --merge-list merge-list-adni1+2+go+3.txt --geno 0.001 --chr 1-22 --make-bed --out adni1+2+go+3
+plink --merge-list merge_list_adni_2_go.txt --make-bed --out merged/adni_2_go
+
+
+# adni_1 _ adni2 _ adnigo _ adni3
+plink --merge-list merge_list_adni_1_2_go_3.txt --make-bed --out merged/adni_1_2_go_3
 # Error! exclude problematic snp
-plink --bfile ADNI3_PLINK_Final --exclude adni1+2+go+3-merge.missnp --make-bed --out ADNI3_PLINK_Final_excluded
+plink --bfile ADNI3_PLINK_Final --flip merged/adni_1_2_go_3-merge.missnp --make-bed --out ADNI3_PLINK_Final_flipped
 
 # -------------------- Apply quality control parameters --------------------
 # On the paper:
@@ -19,11 +22,19 @@ plink --bfile ADNI3_PLINK_Final --exclude adni1+2+go+3-merge.missnp --make-bed -
 # --clump-p1 0.001: Significance threshold for index SNPs
 # --clump-r2 0.05: LD threshold for clumping
 
-plink --bfile adni1+2+go --missing-genotype N --make-bed --mind 0.3 --maf 0.00001 --geno 0.001 --hwe 0.05 --out clean_adni1+2+go
+plink --bfile merged/adni_1_2_go_3 --missing-genotype N --make-bed --chr 1-22 --maf 0.01 --geno 0.01 --hwe 0.05 --out cleaned/cleaned_adni_1_2_go_3
+plink --bfile merged/adni_1_2_go --missing-genotype N --make-bed --chr 1-22 --maf 0.01 --geno 0.01 --hwe 0.05 --out cleaned/cleaned_adni_1_2_go
+plink --bfile merged/adni_2_go --missing-genotype N --make-bed --chr 1-22 --maf 0.01 --geno 0.01 --hwe 0.05 --out cleaned/cleaned_adni_2_go
 
 # Generate phenotype data
-python3 ../src/generate_pheno.py ../wgs_data/adni1+2+go.fam ../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv ../wgs_data/adni1+2+go_pheno.txt
+python3 ../src/generate_pheno.py merged/adni_1_2_go.fam ../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv phenotype_adni_1_2_go.txt
+python3 ../src/generate_pheno.py merged/adni_1_2_go_3.fam ../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv phenotype_adni_1_2_go_3.txt
 # Generate .assoc file
-plink --bfile clean_adni1+2+go --pheno adni1+2+go_pheno.txt --assoc --out clean_adni1+2+go
+plink --bfile cleaned/cleaned_adni_1_2_go_3 --pheno phenotype_adni_1_2_go_3.txt --assoc --out cleaned/cleaned_adni_1_2_go_3
+plink --bfile cleaned/cleaned_adni_1_2_go --pheno phenotype_adni_1_2_go_3.txt --assoc --out cleaned/cleaned_adni_1_2_go
+plink --bfile cleaned/cleaned_adni_2_go --pheno phenotype_adni_1_2_go_3.txt --assoc --out cleaned/cleaned_adni_2_go
+
 # Apply LD-clumping
-plink --bfile clean_adni1+2+go --clump clean_adni1+2+go.assoc --clump-best --clump-p1 0.0001 --clump-r2 0.5 --out clean_adni1+2+go
+plink --bfile cleaned/cleaned_adni_1_2_go --clump cleaned/cleaned_adni_1_2_go.assoc --clump-best --clump-p1 0.0001 --clump-r2 0.5 --out cleaned/cleaned_adni_1_2_go
+
+plink --bfile cleaned/cleaned_adni_1_2_go --clump ../IGAP_data/IGAP.assoc --clump-best --clump-p1 0.001 --clump-r2 0.05 --out cleaned/cleaned_adni_1_2_go
