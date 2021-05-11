@@ -26,17 +26,16 @@ def plot_training_history(history):
     plt.plot(history.history['accuracy'], label='Train', color='blue')
     plt.plot(history.history['val_accuracy'], label='Validation', color='red')
     plt.legend()
-    plt.title('Training history')
+    plt.title('Training accuracy history')
     plt.show()
 
 
 def plot_confusion_matrix(y, y_prob):
     y_pred = np.rint(y_prob)
     cm = metrics.confusion_matrix(y, y_pred)
-    print(cm)
     df_cm = pd.DataFrame(cm, index=["Not alzheimer", "Alzheimer"], columns=["Not alzheimer", "Alzheimer"])
 
-    sn.heatmap(df_cm, annot=True, cmap='Purples', fmt='d')  # font size
+    sn.heatmap(df_cm, vmin=0, annot=True, cmap='Purples', fmt='d')  # font size
 
     plt.xlabel("Predicted labels")
     plt.ylabel("True labels")

@@ -105,14 +105,25 @@ def generate_dataset(diagnostic_dict: dict, bed, bim, fam, snp_list):
         index = index[0]
         snps_to_keep[index] = True
     if snps_not_found > 0:
-        print(f"SNPs from keep list not found: {snps_not_found}")
+        print(f"WARNING: SNPs from keep list not found: {snps_not_found}")
     x = x[:, snps_to_keep]
     # Count NaN values
     n_NaN = np.count_nonzero(np.isnan(x))
     if n_NaN > 0:
-        print(f"Warning: number of missing genotypes in samples: {n_NaN}\n")
-    # Remove NaN columns
-    x = x[:, ~np.isnan(x).any(axis=0)]
-
+        print(f"WARNING: number of missing genotypes in samples: {n_NaN}\n")
+    # Change NaN values
+    #   0 -> First allele
+    #   1 -> Heterozygous
+    #   2 -> Second allele
+    #   math.nan -> missing genotype
+    x = np.nan_to_num(x, 1.5)
+    # x = x[:, ~np.isnan(x).any(axis=0)] # Remove NaN values
 
     return x, y
+
+def count_case_control(y):
+    n_control = np.count_nonzero(y == 0)
+    n_case = np.count_nonzero(y == 1)
+
+    print(f"Number of control: {n_control}, number of cases: {n_case}\n")
+    return n_control, n_case

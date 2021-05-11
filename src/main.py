@@ -12,13 +12,9 @@ root_folder = '../'
 
 diagnostic_dict = read_diagnose(file_path=root_folder + 'diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv')
 
-(bim, fam, bed) = read_plink(root_folder + 'wgs_data/cleaned/cleaned_adni_1_2_go_3')
+(bim, fam, bed) = read_plink(root_folder + 'wgs_data/cleaned/subset1')
+(bim_test, fam_test, bed_test) = read_plink(root_folder + 'wgs_data/cleaned/subset2')
 
-# bed:
-#   0 -> First allele
-#   1 -> Heterozygous
-#   2 -> Second allele
-#   math.nan -> missing genotype
 
 n_wgs_samples = bed.shape[1]
 n_SNPs = bed.shape[0]
@@ -26,37 +22,36 @@ n_SNPs = bed.shape[0]
 print(f"Number of WGS samples: {n_wgs_samples}")
 print(f"Number of variants per WGS sample: {n_SNPs}\n")
 
-IGAP_path = '../wgs_data/cleaned/cleaned_adni_1_2_go_3.assoc'
+IGAP_path = '../wgs_data/cleaned/subset1.assoc'
 IGAP_file = pandas.read_csv(IGAP_path, index_col='SNP', delimiter=r"\s+")
 IGAP_headers = IGAP_file.columns.tolist()
 # Order by p value
 IGAP_file = IGAP_file.sort_values(by=["P"], ascending=True)
 snp_list = IGAP_file.index
-snp_list = snp_list[:700]
+snp_list = snp_list[:50]
 print(snp_list)
 
 # Generate dataset from input data
-x, y = generate_dataset(diagnostic_dict, bed, bim, fam, snp_list)
+x_train, y_train = generate_dataset(diagnostic_dict, bed, bim, fam, snp_list)
+x_test, y_test = generate_dataset(diagnostic_dict, bed_test, bim_test, fam_test, snp_list)
 
-n_wgs_samples = x.shape[0]
-n_SNPs = x.shape[1]
+n_wgs_samples = x_train.shape[0]
+n_SNPs = x_train.shape[1]
 
 print(f"Number of WGS selected in dataset: {n_wgs_samples}")
 print(f"Number of variants per WGS selected in dataset: {n_SNPs}\n")
 
-alzheimer_cases = np.count_nonzero(y)
-no_alzheimer_cases = n_wgs_samples - alzheimer_cases
-
-print(f"Number of Alzheimer's cases in dataset: {alzheimer_cases}")
-print(f"Number of NO Alzheimer's cases in dataset: {no_alzheimer_cases}")
 
 # Split data
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, shuffle=True)
+# x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, shuffle=True)
+
 print(f"Shape of train data: {x_train.shape}")
 print(f"Shape of train labels: {y_train.shape}")
+count_case_control(y_train)
 
 print(f"Shape of test data: {x_test.shape}")
 print(f"Shape of test labels: {y_test.shape}")
+count_case_control(y_test)
 
 # Create and fit model
 print("Creating model...")
@@ -64,8 +59,8 @@ model = create_MLP_model(n_SNPs)
 print("Creating model... DONE")
 
 print("Training model...")
-es = EarlyStopping(monitor='val_accuracy', mode='max', patience=10, verbose=1)
-history = model.fit(x_train, y_train, epochs=100, validation_split=0.111111, callbacks=[es])  # validation_split=0.3
+es = EarlyStopping(monitor='val_loss', mode='max', patience=20, verbose=1)
+history = model.fit(x_train, y_train, epochs=50, validation_split=0.111111, callbacks=[es])
 print("Training model... DONE")
 
 plot_training_history(history)
