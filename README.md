@@ -25,3 +25,21 @@ DX_SUM values:
             1=CN;
             2=MCI;
             3=Dementia
+
+Dictionary values:
+
+    1=CN;
+    2=MCI;
+    3=Dementia
+
+
+Label values:
+
+    0 = CN
+    1 = AD
+
+Phenotype data values:
+
+    0 = CN
+    1 = AD
+    -9 = MCI

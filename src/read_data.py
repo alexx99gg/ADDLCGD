@@ -68,19 +68,19 @@ def generate_dataset(diagnostic_dict: dict, bed, bim, fam, snp_list):
         iid = fam.iat[test, 1]
         # Get diagnose corresponding to the iid
         last_diagnose = diagnostic_dict[iid]
-        has_alzheimer = -1
+        label = -1
         if last_diagnose == 1:
             # Cognitive normal
-            has_alzheimer = 0
-            y.append(has_alzheimer)
+            label = 0
+            y.append(label)
         elif last_diagnose == 2:
             # Mild cognitive impairment
             # Remove this from the datasets as the diagnose is not clear
             samples_to_keep[i] = False
             n_wgs_samples -= 1
         elif last_diagnose == 3:
-            has_alzheimer = 1
-            y.append(has_alzheimer)
+            label = 1
+            y.append(label)
         else:
             print("Error: diagnosis not recognized")
             exit(1)
@@ -121,9 +121,9 @@ def generate_dataset(diagnostic_dict: dict, bed, bim, fam, snp_list):
 
     return x, y
 
+
 def count_case_control(y):
     n_control = np.count_nonzero(y == 0)
     n_case = np.count_nonzero(y == 1)
 
-    print(f"Number of control: {n_control}, number of cases: {n_case}\n")
     return n_control, n_case

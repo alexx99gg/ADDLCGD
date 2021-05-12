@@ -12,9 +12,8 @@ root_folder = '../'
 
 diagnostic_dict = read_diagnose(file_path=root_folder + 'diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv')
 
-(bim, fam, bed) = read_plink(root_folder + 'wgs_data/cleaned/subset1')
-(bim_test, fam_test, bed_test) = read_plink(root_folder + 'wgs_data/cleaned/subset2')
-
+(bim, fam, bed) = read_plink(root_folder + "wgs_data/subsets/ADNI12GO_1")
+(bim_test, fam_test, bed_test) = read_plink(root_folder + "wgs_data/subsets/ADNI12GO_2")
 
 n_wgs_samples = bed.shape[1]
 n_SNPs = bed.shape[0]
@@ -22,14 +21,14 @@ n_SNPs = bed.shape[0]
 print(f"Number of WGS samples: {n_wgs_samples}")
 print(f"Number of variants per WGS sample: {n_SNPs}\n")
 
-IGAP_path = '../wgs_data/cleaned/subset1.assoc'
-IGAP_file = pandas.read_csv(IGAP_path, index_col='SNP', delimiter=r"\s+")
-IGAP_headers = IGAP_file.columns.tolist()
-# Order by p value
-IGAP_file = IGAP_file.sort_values(by=["P"], ascending=True)
-snp_list = IGAP_file.index
+clump_path = '../wgs_data/subsets/ADNI12GO_1.clumped'
+clump_file = pandas.read_csv(clump_path, index_col='SNP', delimiter=r"\s+")
+clump_headers = clump_file.columns.tolist()
+# Order by P value
+clump_file = clump_file.sort_values(by=["P"], ascending=True)
+snp_list = clump_file.index
+# Get the first ones
 snp_list = snp_list[:50]
-print(snp_list)
 
 # Generate dataset from input data
 x_train, y_train = generate_dataset(diagnostic_dict, bed, bim, fam, snp_list)
@@ -47,11 +46,13 @@ print(f"Number of variants per WGS selected in dataset: {n_SNPs}\n")
 
 print(f"Shape of train data: {x_train.shape}")
 print(f"Shape of train labels: {y_train.shape}")
-count_case_control(y_train)
+n_control_train, n_case_train = count_case_control(y_train)
+print(f"Number of control in train: {n_control_train}, number of cases in train: {n_case_train}\n")
 
 print(f"Shape of test data: {x_test.shape}")
 print(f"Shape of test labels: {y_test.shape}")
-count_case_control(y_test)
+n_control_test, n_case_test = count_case_control(y_test)
+print(f"Number of control in test: {n_control_test}, number of cases in test: {n_case_test}\n")
 
 # Create and fit model
 print("Creating model...")
@@ -76,3 +77,6 @@ fpr, tpr, thresholds = roc_curve(y_test, y_test_prob)
 plot_roc_curve(fpr, tpr)
 
 auc_score = roc_auc_score(y_test, y_test_prob)
+
+plot_2d_dataset(x_train, y_train)
+plot_2d_dataset(x_test, y_test)

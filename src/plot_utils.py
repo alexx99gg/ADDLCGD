@@ -3,16 +3,19 @@ import numpy as np
 import pandas as pd
 import seaborn as sn
 from sklearn import metrics
+from sklearn.decomposition import PCA
 
 
 def plot_2d_dataset(x, y):
+    pca = PCA(n_components=2)
+    x_2d = pca.fit_transform(x)
     x_alzheimer = []
     x_no_alzheimer = []
     for i in range(len(y)):
         if y[i] == 1:
-            x_alzheimer.append(x[i])
+            x_alzheimer.append(x_2d[i])
         elif y[i] == 0:
-            x_no_alzheimer.append(x[i])
+            x_no_alzheimer.append(x_2d[i])
     x_alzheimer = np.asarray(x_alzheimer)
     x_no_alzheimer = np.asarray(x_no_alzheimer)
 
@@ -33,9 +36,9 @@ def plot_training_history(history):
 def plot_confusion_matrix(y, y_prob):
     y_pred = np.rint(y_prob)
     cm = metrics.confusion_matrix(y, y_pred)
-    df_cm = pd.DataFrame(cm, index=["Not alzheimer", "Alzheimer"], columns=["Not alzheimer", "Alzheimer"])
+    df_cm = pd.DataFrame(cm, index=["CN", "AD"], columns=["CN", "AD"])
 
-    sn.heatmap(df_cm, vmin=0, annot=True, cmap='Purples', fmt='d')  # font size
+    sn.heatmap(df_cm, vmin=0, annot=True, cmap='Purples', fmt='d')
 
     plt.xlabel("Predicted labels")
     plt.ylabel("True labels")

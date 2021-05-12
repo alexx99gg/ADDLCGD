@@ -7,7 +7,7 @@ from read_data import *
 def main(argv):
     # read params
     if len(argv) != 3:
-        print("Usage: python3 generate_pheno.py fam_file diagnosis_file pheno_file")
+        print("Usage: python3 generate_pheno.py fam_file diagnosis_file output_phenotype_file")
         exit(2)
 
     fam_file = argv[0]
