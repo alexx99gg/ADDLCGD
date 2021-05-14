@@ -1,0 +1,4 @@
+original/ADNI1
+original/ADNI2GO_1
+original/ADNI2GO_2
+original/ADNI3_fixSNP

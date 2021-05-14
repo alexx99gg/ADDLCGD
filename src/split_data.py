@@ -36,10 +36,17 @@ def main(argv):
     x, y = generate_dataset(diagnostic_dict, bed, bim, fam, [])
     n_control, n_case = count_case_control(y)
 
-    n_control_cut = n_control * split_ratio
-    n_case_cut = n_case * split_ratio
+    n_control_cut = int(n_control * split_ratio)
+    n_case_cut = int(n_case * split_ratio)
+    print(f"Number of control: {n_control}, cut at {n_control_cut}")
+    print(f"Number of case: {n_case}, cut at {n_case_cut}")
     i_control = 0
     i_case = 0
+
+    n_control_1 = 0
+    n_control_2 = 0
+    n_case_1 = 0
+    n_case_2 = 0
     for key, data in fam_file.iterrows():
         FID = data[headers.index('FID')]
         IID = key
@@ -48,8 +55,10 @@ def main(argv):
             # CN
             if i_control < n_control_cut:
                 out_file1.write(f"{FID} {IID}\n")
+                n_control_1 += 1
             else:
                 out_file2.write(f"{FID} {IID}\n")
+                n_control_2 += 1
             i_control += 1
         elif diagnose == 2:
             # MCI
@@ -58,10 +67,16 @@ def main(argv):
             # AD
             if i_case < n_case_cut:
                 out_file1.write(f"{FID} {IID}\n")
+                n_case_1 += 1
             else:
                 out_file2.write(f"{FID} {IID}\n")
+                n_case_2 += 1
             i_case += 1
+    print(f"Number of control in dataset 1: {n_control_1}, in dataset 2: {n_control_2}")
+    print(f"Number of cases in dataset 1: {n_case_1}, in dataset 2: {n_case_2}")
 
+    out_file1.close()
+    out_file2.close()
 
 if __name__ == "__main__":
     main(sys.argv[1:])

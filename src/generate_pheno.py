@@ -22,6 +22,9 @@ def main(argv):
     headers = file.columns.tolist()
 
     out_file = open(pheno_file, 'w+')
+    n_CN = 0
+    n_MCI = 0
+    n_AD = 0
 
     for key, data in file.iterrows():
         FID = data[headers.index('FID')]
@@ -30,18 +33,23 @@ def main(argv):
         # '1' = control, '2' = case, '-9'/'0'/non-numeric = missing data if case/control
         if last_diagnose == 1:
             # Cognitive normal
+            n_CN += 1
             out_file.write(f"{FID} {IID} {1}\n")
         elif last_diagnose == 2:
             # Mild cognitive impairment
+            n_MCI += 1
             out_file.write(f"{FID} {IID} {-9}\n")
         elif last_diagnose == 3:
+            n_AD += 1
             out_file.write(f"{FID} {IID} {2}\n")
         else:
-            out_file.write(f"{FID} {IID} {-9}\n")
+            print("ERROR: diagnose not recognized")
+            exit(1)
 
-
-
-        pass
+    print("Phenotype data generated")
+    print(f"Number of CN: {n_CN}")
+    print(f"Number of MCI: {n_MCI}")
+    print(f"Number of AD: {n_AD}")
 
 
 if __name__ == "__main__":

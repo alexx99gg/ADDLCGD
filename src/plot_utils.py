@@ -6,9 +6,7 @@ from sklearn import metrics
 from sklearn.decomposition import PCA
 
 
-def plot_2d_dataset(x, y):
-    pca = PCA(n_components=2)
-    x_2d = pca.fit_transform(x)
+def plot_2d_dataset(x_2d, y):
     x_alzheimer = []
     x_no_alzheimer = []
     for i in range(len(y)):
@@ -19,9 +17,10 @@ def plot_2d_dataset(x, y):
     x_alzheimer = np.asarray(x_alzheimer)
     x_no_alzheimer = np.asarray(x_no_alzheimer)
 
-    plt.plot(x_no_alzheimer[:, 0], x_no_alzheimer[:, 1], 'b.', label='No alzheimer')
-    plt.plot(x_alzheimer[:, 0], x_alzheimer[:, 1], 'r.', label='Alzheimer')
+    plt.plot(x_no_alzheimer[:, 0], x_no_alzheimer[:, 1], 'b.', label='No alzheimer', alpha=0.33)
+    plt.plot(x_alzheimer[:, 0], x_alzheimer[:, 1], 'r.', label='Alzheimer', alpha=0.33)
     plt.legend()
+    plt.title('2D data representation')
     plt.show()
 
 

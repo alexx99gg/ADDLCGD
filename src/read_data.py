@@ -8,7 +8,7 @@ def read_diagnose(file_path: str = '../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv'
     # Read diagnostic summary
     diagnostic_summary = pandas.read_csv(file_path, index_col='PTID')
     diagnostic_summary_headers = diagnostic_summary.columns.tolist()
-
+    diagnostic_summary = diagnostic_summary.sort_values(by=["update_stamp"], ascending=True)
     # Create dictionary
     diagnostic_dict: dict = {}
     for key, data in diagnostic_summary.iterrows():

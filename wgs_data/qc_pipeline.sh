@@ -3,13 +3,13 @@
 # -------------------- Combine plink files --------------------
 # --chr 1-22: chromosome 1 to 22 (discard 23)
 # adni1 + adni2 + adnigo (as in the paper)
-plink --merge-list --chr 1-22 merged/merge_list_ADNI12GO.txt --make-bed --out merged/ADNI12GO
+plink --merge-list merged/merge_list_ADNI12GO.txt --make-bed --out merged/ADNI12GO
 
 
 # adni_1 _ adni2 _ adnigo _ adni3
-plink --merge-list merge_list_adni_1_2_go_3.txt --make-bed --out merged/adni_1_2_go_3
+plink --merge-list merged/merge_list_ADNI12GO3.txt --make-bed --out merged/ADNI12GO3
 # Error! exclude problematic snp
-plink --bfile ADNI3_PLINK_Final --flip merged/adni_1_2_go_3-merge.missnp --make-bed --out ADNI3_PLINK_Final_flipped
+plink --bfile original/ADNI3 --exclude merged/ADNI12GO3-merge.missnp --make-bed --out original/ADNI3_fixSNP
 
 # -------------------- Apply quality control parameters --------------------
 # On the paper:
@@ -29,11 +29,12 @@ python3 ../src/generate_pheno.py "cleaned/${file}.fam" ../diagnosis_data/DXSUM_P
 
 # Split data
 python3 ../src/split_data.py "cleaned/${file}" ../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv 0.8 "subsets/${file}_1" "subsets/${file}_2"
-plink --bfile "cleaned/${file}" --keep-fam "subsets/${file}_1.fam" --make-bed --out "subsets/${file}_1"
-plink --bfile "cleaned/${file}" --keep-fam "subsets/${file}_2.fam" --make-bed --out "subsets/${file}_2"
+plink --bfile "cleaned/${file}" --keep "subsets/${file}_1.fam" --make-bed --out "subsets/${file}_1"
+plink --bfile "cleaned/${file}" --keep "subsets/${file}_2.fam" --make-bed --out "subsets/${file}_2"
 
 # Generate .assoc file of subset 1
 plink --bfile "subsets/${file}_1" --pheno "../phenotype_data/${file}.txt" --assoc --out "subsets/${file}_1"
 
 # Apply LD-clumping
-plink --bfile "subsets/${file}_1" --clump "subsets/${file}_1.assoc" --clump-best --clump-p1 0.0001 --clump-r2 0.5 --out "subsets/${file}_1"
+plink --bfile "subsets/${file}_1" --clump "subsets/${file}_1.assoc" --clump-best --clump-p1 0.001 --clump-r2 0.05 --out "subsets/${file}_1"
+
