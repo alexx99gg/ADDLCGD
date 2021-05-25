@@ -2,12 +2,12 @@
 
 # -------------------- Combine plink files --------------------
 # --chr 1-22: chromosome 1 to 22 (discard 23)
-# adni1 + adni2 + adnigo (as in the paper)
-plink --merge-list merged/merge_list_ADNI12GO.txt --make-bed --out merged/ADNI12GO
+# adni1 + adnigo + adni2 (as in the paper)
+plink --merge-list original/merge_list_ADNI1GO2.txt --make-bed --out merged/ADNI1GO2
 
 
 # adni_1 _ adni2 _ adnigo _ adni3
-plink --merge-list merged/merge_list_ADNI12GO3.txt --make-bed --out merged/ADNI12GO3
+plink --merge-list original/merge_list_ADNI1GO23.txt --make-bed --out merged/ADNI1GO23
 # Error! exclude problematic snp
 plink --bfile original/ADNI3 --exclude merged/ADNI12GO3-merge.missnp --make-bed --out original/ADNI3_fixSNP
 
@@ -20,21 +20,21 @@ plink --bfile original/ADNI3 --exclude merged/ADNI12GO3-merge.missnp --make-bed 
 # --hwe 0.05: Hardy-Weinberg equilibrium
 # --clump-p1 0.001: Significance threshold for index SNPs
 # --clump-r2 0.05: LD threshold for clumping
-file="ADNI12GO"
+file="ADNI1GO23"
 
-plink --bfile "merged/${file}" --missing-genotype N --make-bed --chr 1-22 --maf 0.01 --geno 0.01 --hwe 0.05 --out "cleaned/${file}"
+plink --bfile "original/${file}" --make-bed --missing-genotype N --chr 1-22 --maf 0.01 --geno 0.01 --hwe 0.05 --out "cleaned/${file}"
 
-# Generate phenotype data
-python3 ../src/generate_pheno.py "cleaned/${file}.fam" ../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv "../phenotype_data/${file}.txt"
 
 # Split data
-python3 ../src/split_data.py "cleaned/${file}" ../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv 0.8 "subsets/${file}_1" "subsets/${file}_2"
+python3 ../src/split_data.py "cleaned/${file}" ../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv 0.9 "subsets/${file}_1" "subsets/${file}_2"
 plink --bfile "cleaned/${file}" --keep "subsets/${file}_1.fam" --make-bed --out "subsets/${file}_1"
 plink --bfile "cleaned/${file}" --keep "subsets/${file}_2.fam" --make-bed --out "subsets/${file}_2"
 
+# Generate phenotype data
+python3 ../src/generate_pheno.py "subsets/${file}_1.fam" ../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv "../phenotype_data/${file}_1.txt"
+
 # Generate .assoc file of subset 1
-plink --bfile "subsets/${file}_1" --pheno "../phenotype_data/${file}.txt" --assoc --out "subsets/${file}_1"
+plink --bfile "subsets/${file}_1" --pheno "../phenotype_data/${file}_1.txt" --assoc --out "subsets/${file}_1"
 
 # Apply LD-clumping
-plink --bfile "subsets/${file}_1" --clump "subsets/${file}_1.assoc" --clump-best --clump-p1 0.001 --clump-r2 0.05 --out "subsets/${file}_1"
-
+plink --bfile "subsets/${file}_1" --clump "subsets/${file}_1.assoc" --clump-best --clump-p1 0.0001 --clump-r2 0.5 --out "subsets/${file}_1"

@@ -131,7 +131,8 @@ dmypy.json
 # PyCharm
 .idea
 
-# ADNI data
-**.bed
-wgs_data
-diagnosis_data
+# WGS unnecesary data
+/wgs_data/cleaned/
+/wgs_data/merged/
+/wgs_data/subsets/
+

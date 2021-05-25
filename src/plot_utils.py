@@ -29,6 +29,14 @@ def plot_training_history(history):
     plt.plot(history.history['val_accuracy'], label='Validation', color='red')
     plt.legend()
     plt.title('Training accuracy history')
+    plt.ylim(ymin=0, ymax=1)
+    plt.show()
+
+    plt.plot(history.history['loss'], label='Train', color='blue')
+    plt.plot(history.history['val_loss'], label='Validation', color='red')
+    plt.legend()
+    plt.title('Training loss history')
+    plt.ylim(ymin=0)
     plt.show()
 
 

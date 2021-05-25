@@ -89,10 +89,6 @@ def generate_dataset(diagnostic_dict: dict, bed, bim, fam, snp_list):
     y = y.reshape((n_wgs_samples, 1))
 
     # Generate features data
-    x = np.asarray(bed)
-    x = x.transpose((1, 0))
-    # Delete MCI patients sample
-    x = x[samples_to_keep, :]
 
     # Keep SNPs in snp_list only
     snps_to_keep = [False] * n_snps
@@ -106,7 +102,15 @@ def generate_dataset(diagnostic_dict: dict, bed, bim, fam, snp_list):
         snps_to_keep[index] = True
     if snps_not_found > 0:
         print(f"WARNING: SNPs from keep list not found: {snps_not_found}")
-    x = x[:, snps_to_keep]
+
+    # Filtering
+    bed = bed[:, samples_to_keep]
+    bed = bed[snps_to_keep, :]
+
+    x = np.asarray(bed)
+    x = x.transpose((1, 0))
+
+
     # Count NaN values
     n_NaN = np.count_nonzero(np.isnan(x))
     if n_NaN > 0:

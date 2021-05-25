@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import initializers
 from tensorflow.keras import layers
+from tensorflow.keras import optimizers
 
 
 def create_MLP_model(n_SNPs: int):
@@ -52,7 +53,7 @@ def create_MLP_model(n_SNPs: int):
 
     # Compile the Neural Network
     model.compile(
-        optimizer='adam',
+        optimizer=optimizers.Adam(learning_rate=3e-4),
         loss='binary_crossentropy',
         metrics=['accuracy', 'AUC']
     )
