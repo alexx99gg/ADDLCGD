@@ -17,7 +17,7 @@ def create_MLP_model(n_SNPs: int):
     # Batch Normalization, Dropout Layer with 30% of inputs to drop,Gaussian Noise with 0.3 as Standard Deviation
     model.add(layers.BatchNormalization())
     model.add(layers.Dropout(0.3))
-    model.add(layers.GaussianNoise(0.3))
+    # model.add(layers.GaussianNoise(0.3))
 
     # Dense Layer with 1024 outputs, ReLU as activation, L2 Regularization and He Initialization
     model.add(
@@ -53,7 +53,7 @@ def create_MLP_model(n_SNPs: int):
 
     # Compile the Neural Network
     model.compile(
-        optimizer=optimizers.Adam(learning_rate=3e-4),
+        optimizer=optimizers.Adam(),
         loss='binary_crossentropy',
         metrics=['accuracy', 'AUC']
     )

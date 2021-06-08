@@ -17,14 +17,15 @@ def plot_2d_dataset(x_2d, y):
     x_alzheimer = np.asarray(x_alzheimer)
     x_no_alzheimer = np.asarray(x_no_alzheimer)
 
-    plt.plot(x_no_alzheimer[:, 0], x_no_alzheimer[:, 1], 'b.', label='No alzheimer', alpha=0.33)
-    plt.plot(x_alzheimer[:, 0], x_alzheimer[:, 1], 'r.', label='Alzheimer', alpha=0.33)
+    plt.plot(x_no_alzheimer[:, 0], x_no_alzheimer[:, 1], 'bo', label='No alzheimer', alpha=0.5)
+    plt.plot(x_alzheimer[:, 0], x_alzheimer[:, 1], 'ro', label='Alzheimer', alpha=0.5)
     plt.legend()
     plt.title('2D data representation')
     plt.show()
 
 
 def plot_training_history(history):
+    # Accuracy history
     plt.plot(history.history['accuracy'], label='Train', color='blue')
     plt.plot(history.history['val_accuracy'], label='Validation', color='red')
     plt.legend()
@@ -32,6 +33,15 @@ def plot_training_history(history):
     plt.ylim(ymin=0, ymax=1)
     plt.show()
 
+    # AUC history
+    plt.plot(history.history['auc'], label='Train', color='blue')
+    plt.plot(history.history['val_auc'], label='Validation', color='red')
+    plt.legend()
+    plt.title('Training AUC history')
+    plt.ylim(ymin=0, ymax=1)
+    plt.show()
+
+    # Loss history
     plt.plot(history.history['loss'], label='Train', color='blue')
     plt.plot(history.history['val_loss'], label='Validation', color='red')
     plt.legend()

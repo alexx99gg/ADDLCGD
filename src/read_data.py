@@ -3,6 +3,7 @@ import math
 import numpy as np
 import pandas
 
+from sklearn.svm import SVC
 
 def read_diagnose(file_path: str = '../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv', verbose=False):
     # Read diagnostic summary
@@ -86,7 +87,7 @@ def generate_dataset(diagnostic_dict: dict, bed, bim, fam, snp_list):
             exit(1)
         i += 1
     y = np.asarray(y)
-    y = y.reshape((n_wgs_samples, 1))
+    y = y.reshape((n_wgs_samples, ))
 
     # Generate features data
 
@@ -121,6 +122,10 @@ def generate_dataset(diagnostic_dict: dict, bed, bim, fam, snp_list):
     #   2 -> Second allele
     #   math.nan -> missing genotype
     x = np.nan_to_num(x, 1.5)
+    # Normalize [0..1]
+    n_final_snps = x.shape[1]
+    if n_final_snps > 0:
+        x = (x - np.min(x)) / np.ptp(x)
     # x = x[:, ~np.isnan(x).any(axis=0)] # Remove NaN values
 
     return x, y

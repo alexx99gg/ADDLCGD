@@ -3,11 +3,13 @@
 # -------------------- Combine plink files --------------------
 # --chr 1-22: chromosome 1 to 22 (discard 23)
 # adni1 + adnigo + adni2 (as in the paper)
-plink --merge-list original/merge_list_ADNI1GO2.txt --make-bed --out merged/ADNI1GO2
+plink --merge-list merge_list_ADNI1GO2.txt --make-bed --out merged/ADNI1GO2
+
+plink --merge-list merge_list_ADNIGO2.txt --make-bed --out merged/ADNIGO2
 
 
 # adni_1 _ adni2 _ adnigo _ adni3
-plink --merge-list original/merge_list_ADNI1GO23.txt --make-bed --out merged/ADNI1GO23
+plink --merge-list merge_list_ADNI1GO23.txt --make-bed --out merged/ADNI1GO23
 # Error! exclude problematic snp
 plink --bfile original/ADNI3 --exclude merged/ADNI12GO3-merge.missnp --make-bed --out original/ADNI3_fixSNP
 
@@ -20,9 +22,10 @@ plink --bfile original/ADNI3 --exclude merged/ADNI12GO3-merge.missnp --make-bed 
 # --hwe 0.05: Hardy-Weinberg equilibrium
 # --clump-p1 0.001: Significance threshold for index SNPs
 # --clump-r2 0.05: LD threshold for clumping
-file="ADNI1GO23"
+file="ADNIGO2"
 
-plink --bfile "original/${file}" --make-bed --missing-genotype N --chr 1-22 --maf 0.01 --geno 0.01 --hwe 0.05 --out "cleaned/${file}"
+plink --bfile "merged/${file}" --make-bed --missing-genotype N --rel-cutoff --chr 1-22 --maf 0.01 --geno 0.001 --hwe 0.05 --out "cleaned/${file}"
+# plink --bfile "merged/${file}" --make-bed --missing-genotype N --chr 1-22 --mind 0.1 --maf 0.01 --geno 0.001 --hwe 0.05 --out "cleaned/${file}"
 
 
 # Split data
@@ -34,7 +37,7 @@ plink --bfile "cleaned/${file}" --keep "subsets/${file}_2.fam" --make-bed --out 
 python3 ../src/generate_pheno.py "subsets/${file}_1.fam" ../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv "../phenotype_data/${file}_1.txt"
 
 # Generate .assoc file of subset 1
-plink --bfile "subsets/${file}_1" --pheno "../phenotype_data/${file}_1.txt" --assoc --out "subsets/${file}_1"
+plink --bfile "subsets/${file}_1" --pheno "../phenotype_data/${file}_1.txt" --assoc fisher-midp --out "subsets/${file}_1"
 
 # Apply LD-clumping
-plink --bfile "subsets/${file}_1" --clump "subsets/${file}_1.assoc" --clump-best --clump-p1 0.0001 --clump-r2 0.5 --out "subsets/${file}_1"
+plink --bfile "subsets/${file}_1" --clump "subsets/${file}_1.assoc.fisher" --clump-best --clump-p1 0.00001 --clump-r2 0.5 --out "subsets/${file}_1"
