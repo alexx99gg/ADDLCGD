@@ -1,5 +1,9 @@
+import numpy as np
 from pandas_plink import read_plink
-from sklearn.metrics import roc_curve, roc_auc_score, auc
+from sklearn.decomposition import PCA
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import roc_curve, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 from tensorflow.python.keras.callbacks import EarlyStopping
@@ -17,6 +21,8 @@ clumpd_1_path = f"../wgs_data/subsets/{dataset}_1.clumped"
 subset_1_path = f"../wgs_data/subsets/{dataset}_1"
 subset_2_path = f"../wgs_data/subsets/{dataset}_2"
 
+print(f"Reading dataset {dataset}")
+
 # Read diagnoses
 diagnostic_dict = read_diagnose(file_path=diagnose_path)
 
@@ -31,7 +37,7 @@ snp_list = clump_file.index.tolist()
 
 # snp_list = snp_list + p_snp
 # Get the first ones
-# snp_list = snp_list[:15]
+# snp_list = snp_list[:5]
 print(f"{len(snp_list)} SNPs selected (in relevance order):")
 print(snp_list)
 
@@ -83,27 +89,18 @@ if n_train_SNPs != n_test_SNPs:
 
 # ----- Deep Neural Network -----
 # Generate and train model
-print("Creating DNNL model...")
-DNNL_model = create_MLP_model(n_train_SNPs)
+print("Creating DNN model...")
+DNN_model = create_MLP_model(n_train_SNPs)
 print("Creating model... DONE")
-print("Training DNNL model...")
-es = EarlyStopping(monitor='val_auc', mode='max', patience=50, restore_best_weights=True, verbose=1)
-history = DNNL_model.fit(x_train, y_train, epochs=500, validation_split=0.15, callbacks=[es])
-print("Training DNNL model... DONE")
+print("Training DNN model...")
+es = EarlyStopping(monitor='val_auc', mode='max', patience=25, restore_best_weights=True, verbose=1)
+history = DNN_model.fit(x_train, y_train, epochs=500, validation_split=0.15, callbacks=[es])
+print("Training DNN model... DONE")
 plot_training_history(history)
 
-print("Evaluate DNNL model...")
-DNNL_model.evaluate(x_test, y_test, verbose=2)
-
-DNNL_y_test_prob = DNNL_model.predict(x_test)
-DNNL_fpr, DNNL_tpr, DNNL_thresholds = roc_curve(y_test, DNNL_y_test_prob)
-auc_score = roc_auc_score(y_test, DNNL_y_test_prob)
-
-print(f"DNNL model AUC in test data: {auc_score}")
-
-plot_confusion_matrix(y_test, DNNL_y_test_prob)
-
-plot_roc_curve(DNNL_fpr, DNNL_tpr)
+print("Evaluate DNN model...")
+DNN_y_test_prob = DNN_model.predict(x_test)
+plot_confusion_matrix(y_test, DNN_y_test_prob, "DNN")
 
 # ----- Support Vector Machine -----
 # Generate and train model
@@ -111,19 +108,33 @@ print("Creating SVC model...")
 SVC_model = SVC(kernel='rbf')
 SVC_model.fit(x_train, y_train)
 
-score_train = SVC_model.score(x_train, y_train)
-print(f"SVC model mean accuracy in train data: {score_train}")
-
-score_test = SVC_model.score(x_test, y_test)
-
+print("Evaluate SVC model...")
 SVC_y_test_prob = SVC_model.predict(x_test)
-SVC_fpr, SVC_tpr, SVC_thresholds = roc_curve(y_test, SVC_y_test_prob)
-auc_score = roc_auc_score(y_test, SVC_y_test_prob)
+plot_confusion_matrix(y_test, SVC_y_test_prob, "SVC")
 
-print(f"SVC model mean accuracy in test data: {score_test}")
-print(f"SVC model AUC in test data: {auc_score}")
-plot_confusion_matrix(y_test, SVC_y_test_prob)
-plot_roc_curve(SVC_fpr, SVC_tpr)
+# ----- Random Forest -----
+# Generate and train model
+print("Creating RF model...")
+RF_model = RandomForestClassifier()
+RF_model.fit(x_train, y_train)
+
+print("Evaluate RF model...")
+RF_y_test_prob = RF_model.predict(x_test)
+plot_confusion_matrix(y_test, RF_y_test_prob, 'RF')
+
+# ----- Gradient Boosting -----
+# Generate and train model
+print("Creating GBC model...")
+GBC_model = GradientBoostingClassifier()
+GBC_model.fit(x_train, y_train)
+
+print("Evaluate GBC model...")
+GBC_y_test_prob = GBC_model.predict(x_test)
+plot_confusion_matrix(y_test, GBC_y_test_prob, 'GBC')
+
+
+# ----- Plot ROC curve ------
+plot_roc_curve(y_test, DNN_y_test_prob, SVC_y_test_prob, RF_y_test_prob, GBC_y_test_prob)
 
 # ----- Represent data to 2D -----
 # Reduce to two dimension via Primary Component Analysis
@@ -132,5 +143,10 @@ pca = pca.fit(x_train)
 x_train_2d = pca.transform(x_train)
 x_test_2d = pca.transform(x_test)
 
-plot_2d_dataset(x_train_2d, y_train)
-plot_2d_dataset(x_test_2d, y_test)
+xmax = max(max(x_train_2d[:, 0]), max(x_test_2d[:, 0])) + 0.2
+xmin = min(min(x_train_2d[:, 0]), min(x_test_2d[:, 0])) - 0.2
+ymax = max(max(x_train_2d[:, 1]), max(x_test_2d[:, 1])) + 0.2
+ymin = min(min(x_train_2d[:, 1]), min(x_test_2d[:, 1])) - 0.2
+
+plot_2d_dataset(x_train_2d, y_train, xmin, xmax, ymin, ymax)
+plot_2d_dataset(x_test_2d, y_test, xmin, xmax, ymin, ymax)

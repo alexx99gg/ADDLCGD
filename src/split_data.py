@@ -43,12 +43,14 @@ def main(argv):
     n_control_2 = n_control - n_control_1
     n_case_2 = n_case - n_case_1
 
-    if n_control > n_case:
-        n_control_1 = n_case_1
-        n_control_2 = n_case_2
-    elif n_case > n_control:
-        n_case_1 = n_control_1
-        n_case_2 = n_control_2
+    # if n_control > n_case:
+    #     print(f"Warning: Discarding {n_control - n_case} controls")
+    #     n_control_1 = n_case_1
+    #     n_control_2 = n_case_2
+    # elif n_case > n_control:
+    #     print(f"Warning: Discarding {n_case - n_control} cases")
+    #     n_case_1 = n_control_1
+    #     n_case_2 = n_control_2
 
     counter_control_1, counter_control_2 = 0, 0
     counter_case_1, counter_case_2 = 0, 0

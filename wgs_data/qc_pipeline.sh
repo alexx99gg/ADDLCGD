@@ -22,9 +22,10 @@ plink --bfile original/ADNI3 --exclude merged/ADNI12GO3-merge.missnp --make-bed 
 # --hwe 0.05: Hardy-Weinberg equilibrium
 # --clump-p1 0.001: Significance threshold for index SNPs
 # --clump-r2 0.05: LD threshold for clumping
-file="ADNIGO2"
+file="ADNI1GO2"
 
-plink --bfile "merged/${file}" --make-bed --missing-genotype N --rel-cutoff --chr 1-22 --maf 0.01 --geno 0.001 --hwe 0.05 --out "cleaned/${file}"
+plink --bfile "merged/${file}" --make-bed --missing-genotype N --chr 1-22 --rel-cutoff 0.025 --out "cleaned/${file}"
+plink --bfile "cleaned/${file}" --make-bed --missing-genotype N --maf 0.05 --geno 0.001 --hwe 0.05 --out "cleaned/${file}"
 # plink --bfile "merged/${file}" --make-bed --missing-genotype N --chr 1-22 --mind 0.1 --maf 0.01 --geno 0.001 --hwe 0.05 --out "cleaned/${file}"
 
 
@@ -37,7 +38,7 @@ plink --bfile "cleaned/${file}" --keep "subsets/${file}_2.fam" --make-bed --out 
 python3 ../src/generate_pheno.py "subsets/${file}_1.fam" ../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv "../phenotype_data/${file}_1.txt"
 
 # Generate .assoc file of subset 1
-plink --bfile "subsets/${file}_1" --pheno "../phenotype_data/${file}_1.txt" --assoc fisher-midp --out "subsets/${file}_1"
+plink --bfile "subsets/${file}_1" --pheno "../phenotype_data/${file}_1.txt" --assoc fisher-midp perm --out "subsets/${file}_1"
 
 # Apply LD-clumping
-plink --bfile "subsets/${file}_1" --clump "subsets/${file}_1.assoc.fisher" --clump-best --clump-p1 0.00001 --clump-r2 0.5 --out "subsets/${file}_1"
+plink --bfile "subsets/${file}_1" --clump "subsets/${file}_1.assoc.fisher.perm" --clump-field EMP1 --clump-best --clump-p1 0.000005 --clump-r2 0.5 --out "subsets/${file}_1"
