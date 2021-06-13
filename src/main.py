@@ -6,6 +6,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 from tensorflow.python.keras.callbacks import EarlyStopping
+from xgboost import XGBClassifier
 
 from plot_utils import *
 from read_data import *
@@ -34,7 +35,7 @@ snp_list = clump_file.index.tolist()
 
 # snp_list = snp_list + p_snp
 # Get the first ones
-# snp_list = snp_list[:5]
+snp_list = snp_list[:7]
 print(f"{len(snp_list)} SNPs selected (in relevance order):")
 print(snp_list)
 
