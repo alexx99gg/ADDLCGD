@@ -3,7 +3,6 @@ from pandas_plink import read_plink
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.metrics import roc_curve, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 from tensorflow.python.keras.callbacks import EarlyStopping
@@ -11,8 +10,6 @@ from tensorflow.python.keras.callbacks import EarlyStopping
 from plot_utils import *
 from read_data import *
 from train_data import *
-
-plt.rcParams['font.size'] = '16'
 
 dataset = "ADNI1GO2"
 
@@ -100,17 +97,20 @@ plot_training_history(history)
 
 print("Evaluate DNN model...")
 DNN_y_test_prob = DNN_model.predict(x_test)
-plot_confusion_matrix(y_test, DNN_y_test_prob, "DNN")
+DNN_y_test_pred = (DNN_y_test_prob > 0.5).astype("int32")
+plot_confusion_matrix(y_test, DNN_y_test_prob, DNN_y_test_pred, "DNN")
 
 # ----- Support Vector Machine -----
 # Generate and train model
-print("Creating SVC model...")
-SVC_model = SVC(kernel='rbf')
-SVC_model.fit(x_train, y_train)
+print("Creating SVM model...")
+SVM_model = SVC(kernel='rbf', probability=True)
+SVM_model.fit(x_train, y_train)
 
-print("Evaluate SVC model...")
-SVC_y_test_prob = SVC_model.predict(x_test)
-plot_confusion_matrix(y_test, SVC_y_test_prob, "SVC")
+print("Evaluate SVM model...")
+SVM_y_test_prob = SVM_model.predict_proba(x_test)
+SVM_y_test_prob = SVM_y_test_prob[:, 1]
+SVM_y_test_pred = SVM_model.predict(x_test)
+plot_confusion_matrix(y_test, SVM_y_test_prob, SVM_y_test_pred, "SVM")
 
 # ----- Random Forest -----
 # Generate and train model
@@ -119,22 +119,25 @@ RF_model = RandomForestClassifier()
 RF_model.fit(x_train, y_train)
 
 print("Evaluate RF model...")
-RF_y_test_prob = RF_model.predict(x_test)
-plot_confusion_matrix(y_test, RF_y_test_prob, 'RF')
+RF_y_test_prob = RF_model.predict_proba(x_test)
+RF_y_test_prob = RF_y_test_prob[:, 1]
+RF_y_test_pred = RF_model.predict(x_test)
+plot_confusion_matrix(y_test, RF_y_test_prob, RF_y_test_pred, 'RF')
 
 # ----- Gradient Boosting -----
 # Generate and train model
-print("Creating GBC model...")
-GBC_model = GradientBoostingClassifier()
-GBC_model.fit(x_train, y_train)
+print("Creating GB model...")
+GB_model = GradientBoostingClassifier()
+GB_model.fit(x_train, y_train)
 
-print("Evaluate GBC model...")
-GBC_y_test_prob = GBC_model.predict(x_test)
-plot_confusion_matrix(y_test, GBC_y_test_prob, 'GBC')
-
+print("Evaluate GB model...")
+GB_y_test_prob = GB_model.predict_proba(x_test)
+GB_y_test_prob = GB_y_test_prob[:, 1]
+GB_y_test_pred = GB_model.predict(x_test)
+plot_confusion_matrix(y_test, GB_y_test_prob, GB_y_test_pred, 'GB')
 
 # ----- Plot ROC curve ------
-plot_roc_curve(y_test, DNN_y_test_prob, SVC_y_test_prob, RF_y_test_prob, GBC_y_test_prob)
+plot_roc_curve(y_test, DNN_y_test_prob, SVM_y_test_prob, RF_y_test_prob, GB_y_test_prob)
 
 # ----- Represent data to 2D -----
 # Reduce to two dimension via Primary Component Analysis
@@ -148,5 +151,5 @@ xmin = min(min(x_train_2d[:, 0]), min(x_test_2d[:, 0])) - 0.2
 ymax = max(max(x_train_2d[:, 1]), max(x_test_2d[:, 1])) + 0.2
 ymin = min(min(x_train_2d[:, 1]), min(x_test_2d[:, 1])) - 0.2
 
-plot_2d_dataset(x_train_2d, y_train, xmin, xmax, ymin, ymax)
-plot_2d_dataset(x_test_2d, y_test, xmin, xmax, ymin, ymax)
+plot_2d_dataset(x_train_2d, y_train, xmin, xmax, ymin, ymax, "train")
+plot_2d_dataset(x_test_2d, y_test, xmin, xmax, ymin, ymax, "test")

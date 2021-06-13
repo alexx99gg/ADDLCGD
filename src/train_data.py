@@ -24,37 +24,37 @@ def create_MLP_model(n_SNPs: int):
 
     # Dense with neurons equal to the number of inputs SNPs, ReLU as activation, L2 Regularization and He Initialization
     model.add(
-        layers.Dense(n_SNPs, activation='elu', kernel_regularizer='l1',
+        layers.Dense(n_SNPs, activation='elu', kernel_regularizer='l1_l2',
                      kernel_initializer=initializers.he_normal))
     # Batch Normalization, Dropout Layer with 30% of inputs to drop,Gaussian Noise with 0.2 as Standard Deviation
     model.add(layers.BatchNormalization())
-    model.add(layers.Dropout(0.2))
-    # model.add(layers.GaussianNoise(0.2))
+    #model.add(layers.Dropout(0.2))
+    model.add(layers.GaussianNoise(0.2))
 
     # Dense Layer with 1024 outputs, ReLU as activation, L2 Regularization and He Initialization
     model.add(
-        layers.Dense(1024, activation='elu', kernel_regularizer='l1', kernel_initializer=initializers.he_normal))
+        layers.Dense(1024, activation='elu', kernel_regularizer='l1_l2', kernel_initializer=initializers.he_normal))
     # Batch Normalization, Dropout Layer with 30% of inputs to drop
     model.add(layers.BatchNormalization())
     model.add(layers.Dropout(0.2))
 
     # Dense Layer with 512 outputs, ReLU as activation, L2 Regularization and He Initialization
     model.add(
-        layers.Dense(512, activation='elu', kernel_regularizer='l1', kernel_initializer=initializers.he_normal))
+        layers.Dense(512, activation='elu', kernel_regularizer='l1_l2', kernel_initializer=initializers.he_normal))
     # Batch Normalization, Dropout Layer with 30% of inputs to drop
     model.add(layers.BatchNormalization())
     model.add(layers.Dropout(0.2))
 
     # Dense Layer with 256 outputs, ReLU as activation, L2 Regularization and He Initialization
     model.add(
-        layers.Dense(256, activation='elu', kernel_regularizer='l1', kernel_initializer=initializers.he_normal))
+        layers.Dense(256, activation='elu', kernel_regularizer='l1_l2', kernel_initializer=initializers.he_normal))
     # Batch Normalization, Dropout Layer with 30% of inputs to drop
     model.add(layers.BatchNormalization())
     model.add(layers.Dropout(0.2))
 
     # Dense Layer with 64 outputs, ReLU as activation, L2 Regularization and He Initialization
     model.add(
-        layers.Dense(64, activation='elu', kernel_regularizer='l1', kernel_initializer=initializers.he_normal))
+        layers.Dense(64, activation='elu', kernel_regularizer='l1_l2', kernel_initializer=initializers.he_normal))
     # Batch Normalization, Dropout Layer with 30% of inputs to drop
     model.add(layers.BatchNormalization())
     model.add(layers.Dropout(0.2))
@@ -65,7 +65,7 @@ def create_MLP_model(n_SNPs: int):
 
     # Compile the Neural Network
     model.compile(
-        optimizer=optimizers.Adam(learning_rate=3e-4),
+        optimizer=optimizers.Adam(learning_rate=1e-4),
         loss='binary_crossentropy',
         metrics=['accuracy', 'AUC']
     )
