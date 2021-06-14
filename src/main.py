@@ -46,7 +46,7 @@ for fold in folds:
     print(snp_list)
 
     # Load train data
-    (bim, fam, bed) = read_plink(train_path)
+    (bim, fam, bed) = read_plink(train_path, verbose=False)
     x_train, y_train = generate_dataset(bed, bim, fam, snp_list)
     x_train, y_train = shuffle(x_train, y_train)
 
@@ -61,7 +61,7 @@ for fold in folds:
     # Test data
     if test_path is not None:
         # Load test file
-        (bim_test, fam_test, bed_test) = read_plink(test_path)
+        (bim_test, fam_test, bed_test) = read_plink(test_path, verbose=False)
         n_original_test_SNPs = bed.shape[0]
         x_test, y_test = generate_dataset(bed_test, bim_test, fam_test, snp_list)
         x_test, y_test = shuffle(x_test, y_test)
@@ -87,7 +87,7 @@ for fold in folds:
     DNN_model = create_MLP_model(n_train_SNPs)
     print("Training DNN model...")
     es = EarlyStopping(monitor='val_auc', mode='max', patience=25, restore_best_weights=True, verbose=0)
-    history = DNN_model.fit(x_train, y_train, epochs=5, validation_split=0.15, callbacks=[es], verbose=0)
+    history = DNN_model.fit(x_train, y_train, epochs=500, validation_split=0.15, callbacks=[es], verbose=0)
     plot_training_history(history)
 
     print("Evaluate DNN model...")

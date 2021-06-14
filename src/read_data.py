@@ -131,7 +131,7 @@ def count_case_control(y):
 
 
 def get_selected_snps(clumped_path):
-    clump_file = pandas.read_csv(clumped_path, index_col='SNP', delimiter=r" +")
+    clump_file = pandas.read_csv(clumped_path, index_col='SNP', delimiter=r" +", engine='python')
     clump_headers = clump_file.columns.tolist()
     # Order by P value
     clump_file = clump_file.sort_values(by=["P"], ascending=True)
