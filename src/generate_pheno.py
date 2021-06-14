@@ -33,6 +33,7 @@ def main(argv):
         sex = data[headers.index('sex')]
 
         last_diagnose = diagnostic_dict[key]
+        # According to plink, phenotype data values:
         # '1' = control, '2' = case, '-9'/'0'/non-numeric = missing data if case/control
         if last_diagnose == 1:
             # Cognitive normal

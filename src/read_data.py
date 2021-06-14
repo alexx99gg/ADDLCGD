@@ -3,7 +3,6 @@ import math
 import numpy as np
 import pandas
 
-from sklearn.svm import SVC
 
 def read_diagnose(file_path: str = '../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv', verbose=False):
     # Read diagnostic summary
@@ -56,38 +55,32 @@ def print_diagnostic_dict_summary(diagnostic_dict: dict):
           f"Number of AD patients: {n_AD}\n")
 
 
-def generate_dataset(diagnostic_dict: dict, bed, bim, fam, snp_list):
+def generate_dataset(bed, bim, fam, snp_list):
     n_wgs_samples = bed.shape[1]
     n_snps = bed.shape[0]
     y = []
     # Generate label data
     # Keep only Alzheimer and cognitive normal patients (delete MCI patients)
     samples_to_keep = [True] * n_wgs_samples
-    i = 0
-    for test in range(n_wgs_samples):
-        # Read iid from wgs data
-        iid = fam.iat[test, 1]
-        # Get diagnose corresponding to the iid
-        last_diagnose = diagnostic_dict[iid]
-        label = -1
-        if last_diagnose == 1:
+    for i in range(n_wgs_samples):
+        # Read phenotype data
+        phenotype = int(fam.iat[i, 5])
+        # print(phenotype)
+        # According to plink, phenotype data values:
+        # '1' = control, '2' = case, '-9'/'0'/non-numeric = missing data if case/control
+        if phenotype == 1:
             # Cognitive normal
             label = 0
             y.append(label)
-        elif last_diagnose == 2:
-            # Mild cognitive impairment
-            # Remove this from the datasets as the diagnose is not clear
-            samples_to_keep[i] = False
-            n_wgs_samples -= 1
-        elif last_diagnose == 3:
+        elif phenotype == 2:
             label = 1
             y.append(label)
         else:
-            print("Error: diagnosis not recognized")
-            exit(1)
-        i += 1
+            # Remove this from the datasets as the diagnose is not clear
+            samples_to_keep[i] = False
+            n_wgs_samples -= 1
     y = np.asarray(y)
-    y = y.reshape((n_wgs_samples, ))
+    y = y.reshape((n_wgs_samples,))
 
     # Generate features data
 
@@ -110,7 +103,6 @@ def generate_dataset(diagnostic_dict: dict, bed, bim, fam, snp_list):
 
     x = np.asarray(bed)
     x = x.transpose((1, 0))
-
 
     # Count NaN values
     n_NaN = np.count_nonzero(np.isnan(x))
@@ -136,3 +128,13 @@ def count_case_control(y):
     n_case = np.count_nonzero(y == 1)
 
     return n_control, n_case
+
+
+def get_selected_snps(clumped_path):
+    clump_file = pandas.read_csv(clumped_path, index_col='SNP', delimiter=r" +")
+    clump_headers = clump_file.columns.tolist()
+    # Order by P value
+    clump_file = clump_file.sort_values(by=["P"], ascending=True)
+    snp_list = clump_file.index.tolist()
+
+    return snp_list

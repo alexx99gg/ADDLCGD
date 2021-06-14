@@ -73,29 +73,31 @@ def plot_confusion_matrix(y, y_prob, y_pred, model: str):
     print(f"{model} Precision {precision:.2f} Recall {recall:.2f} AUC {auc:.2f}")
 
 
-def plot_roc_curve(y, DNN_y_prob, SVM_y_prob, RF_y_prob, GB_y_prob):
-
+def plot_roc_curve(DNN_auc_score_list, DNN_tpr_matrix, SVM_auc_score_list, SVM_tpr_matrix,
+               RF_auc_score_list, RF_tpr_matrix, GB_auc_score_list, GB_tpr_matrix):
     # Draw diagonal reference line
     line_x_y = np.linspace(0, 1, 100)
     plt.plot(line_x_y, line_x_y, color='red', alpha=0.7, linewidth=2.25, linestyle='dashed')
 
-    DNN_auc_score = roc_auc_score(y, DNN_y_prob)
-    DNN_fpr, DNN_tpr, _ = roc_curve(y, DNN_y_prob)
+    DNN_mean_auc_score = np.mean(DNN_auc_score_list)
+    SVM_mean_auc_score = np.mean(SVM_auc_score_list)
+    RF_mean_auc_score = np.mean(RF_auc_score_list)
+    GB_mean_auc_score = np.mean(GB_auc_score_list)
 
-    SVM_auc_score = roc_auc_score(y, SVM_y_prob)
-    SVM_fpr, SVM_tpr, _ = roc_curve(y, SVM_y_prob)
+    base_fpr = np.linspace(0, 1, 101)
 
-    RF_auc_score = roc_auc_score(y, RF_y_prob)
-    RF_fpr, RF_tpr, _ = roc_curve(y, RF_y_prob)
+    DNN_mean_tpr = DNN_tpr_matrix.mean(axis=0)
+    SVM_mean_tpr = SVM_tpr_matrix.mean(axis=0)
+    RF_mean_tpr = RF_tpr_matrix.mean(axis=0)
+    GB_mean_tpr = GB_tpr_matrix.mean(axis=0)
 
-    GB_auc_score = roc_auc_score(y, GB_y_prob)
-    GB_fpr, GB_tpr, _ = roc_curve(y, GB_y_prob)
+
 
     # Draw roc curve
-    plt.plot(DNN_fpr, DNN_tpr, linewidth=6, color='blue', alpha=0.7, label=f"DNN (AUC {DNN_auc_score:.2f})")
-    plt.plot(SVM_fpr, SVM_tpr, linewidth=5, color='purple', alpha=0.7, label=f"SVM (AUC {SVM_auc_score:.2f})")
-    plt.plot(RF_fpr, RF_tpr, linewidth=4, color='orange', alpha=0.7, label=f"RF (AUC {RF_auc_score:.2f})")
-    plt.plot(GB_fpr, GB_tpr, linewidth=3, color='green', alpha=0.7, label=f"GB (AUC {GB_auc_score:.2f})")
+    plt.plot(base_fpr, DNN_mean_tpr, linewidth=6, color='blue', alpha=0.7, label=f"DNN (mean AUC {DNN_mean_auc_score:.2f})")
+    plt.plot(base_fpr, SVM_mean_tpr, linewidth=5, color='purple', alpha=0.7, label=f"SVM (mean AUC {SVM_mean_auc_score:.2f})")
+    plt.plot(base_fpr, RF_mean_tpr, linewidth=4, color='orange', alpha=0.7, label=f"RF (mean AUC {RF_mean_auc_score:.2f})")
+    plt.plot(base_fpr, GB_mean_tpr, linewidth=3, color='green', alpha=0.7, label=f"GB (mean AUC {GB_mean_auc_score:.2f})")
 
     plt.axis([0, 1, 0, 1])
     plt.xlabel('False Positive Rate')
