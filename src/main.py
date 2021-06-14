@@ -3,6 +3,7 @@ from pandas_plink import read_plink
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import roc_curve
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 from sklearn.utils import shuffle
@@ -14,7 +15,7 @@ from read_data import *
 from train_data import *
 
 dataset_path = "../wgs_data/subsets/"
-dataset = "ADNI1GO23"
+dataset = "ADNI1GO2"
 print(f"Reading dataset {dataset}")
 
 DNN_auc_score_list = []
@@ -31,17 +32,17 @@ GB_tpr_matrix = []
 
 base_fpr = np.linspace(0, 1, 101)
 
-folds = [1, 2]
+folds = [1, 2, 3, 4, 5]
 for fold in folds:
     print(f"Fold number {fold}")
-    clumped_path = f"{dataset_path}{dataset}_fold_{fold}_train.clumped"
+    clumped_path = f"{dataset_path}{dataset}_fold_{fold}_train.assoc.fisher"
     train_path = f"{dataset_path}{dataset}_fold_{fold}_train"
     test_path = f"{dataset_path}{dataset}_fold_{fold}_test"
 
     # Get SNPs to keep
     snp_list = get_selected_snps(clumped_path)
     # Get the first ones
-    snp_list = snp_list[:7]
+    snp_list = snp_list[:15]
     print(f"{len(snp_list)} SNPs selected (in relevance order):")
     print(snp_list)
 
@@ -67,7 +68,7 @@ for fold in folds:
         x_test, y_test = shuffle(x_test, y_test)
     else:
         # Extract and remove test data from train
-        x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.33, shuffle=True)
+        x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.15, shuffle=True)
 
     n_test_samples = x_test.shape[0]
     n_test_SNPs = x_test.shape[1]
@@ -86,7 +87,7 @@ for fold in folds:
     print("Creating DNN model...")
     DNN_model = create_MLP_model(n_train_SNPs)
     print("Training DNN model...")
-    es = EarlyStopping(monitor='val_auc', mode='max', patience=25, restore_best_weights=True, verbose=0)
+    es = EarlyStopping(monitor='val_loss', mode='min', patience=25, restore_best_weights=False, verbose=0)
     history = DNN_model.fit(x_train, y_train, epochs=500, validation_split=0.15, callbacks=[es], verbose=0)
     plot_training_history(history)
 
@@ -180,4 +181,3 @@ GB_tpr_matrix = np.array(GB_tpr_matrix)
 # Finally plot ROC curve
 plot_roc_curve(DNN_auc_score_list, DNN_tpr_matrix, SVM_auc_score_list, SVM_tpr_matrix,
                RF_auc_score_list, RF_tpr_matrix, GB_auc_score_list, GB_tpr_matrix)
-

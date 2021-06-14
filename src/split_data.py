@@ -9,14 +9,16 @@ from read_data import *
 
 def main(argv):
     # read params
-    if len(argv) != 4:
-        print("Usage: python3 split_data.py plink_file diagnose_file splits out_file_root")
+    if len(argv) != 6:
+        print("Usage: python3 split_data.py plink_file diagnose_file splits p1 r2 out_file_root")
         exit(2)
 
     plink_path = argv[0]
     diagnose_path = argv[1]
     splits = int(argv[2])
-    out_file_root = argv[3]
+    p1 = float(argv[3])
+    r2 = float(argv[4])
+    out_file_root = argv[5]
 
     # Read fam file
     fam_file = pandas.read_csv(plink_path + '.fam', names=['FID', 'IID', 'father', 'mother', 'sex', 'phenotype'],
@@ -31,8 +33,14 @@ def main(argv):
     for key, data in fam_file.iterrows():
         IID = key
         diagnose = diagnostic_dict[IID]
-        X.append(IID)
-        y.append(diagnose)
+        if diagnose == 1:
+            X.append(IID)
+            y.append(0)
+        elif diagnose == 3:
+            X.append(IID)
+            y.append(1)
+        else:
+            continue
 
     X = np.asarray(X)
     skf = StratifiedKFold(n_splits=splits, shuffle=True)
@@ -51,8 +59,8 @@ def main(argv):
         train_file_path = os.path.abspath(f"{out_file_root}_fold_{split_i}_train")
         test_file_path = os.path.abspath(f"{out_file_root}_fold_{split_i}_test")
 
-        command1 = f"plink --bfile {train_file_path} --allow-no-sex --assoc fisher-midp perm --out {train_file_path}"
-        command2 = f"plink --bfile {train_file_path} --allow-no-sex --clump {train_file_path}.assoc.fisher.perm --clump-field EMP1 --clump-p1 0.0001 --clump-r2 0.5 --out {train_file_path}"
+        command1 = f"plink --bfile {train_file_path} --assoc fisher-midp --out {train_file_path}"
+        command2 = f"plink --bfile {train_file_path} --clump {train_file_path}.assoc.fisher --clump-best --clump-p1 {p1} --clump-r2 {r2} --out {train_file_path}"
         process1 = subprocess.Popen(command1, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         stdout, stderr = process1.communicate()
         print(stdout.decode('utf-8'), stderr.decode('utf-8'))

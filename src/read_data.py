@@ -1,7 +1,10 @@
 import math
 
+import dask
 import numpy as np
 import pandas
+
+dask.config.set({"array.slicing.split_large_chunks": False})
 
 
 def read_diagnose(file_path: str = '../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv', verbose=False):
