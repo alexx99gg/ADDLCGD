@@ -5,7 +5,7 @@ import seaborn as sn
 from sklearn import metrics
 from sklearn.metrics import roc_auc_score, auc, precision_score, recall_score
 
-plt.rcParams['font.size'] = '15'
+plt.rcParams['font.size'] = '14'
 
 
 def plot_2d_dataset(x_2d, y, xmin, xmax, ymin, ymax, source: str):
@@ -70,7 +70,8 @@ def plot_roc_curve(DNN_auc_score_list, DNN_tpr_matrix, SVM_auc_score_list, SVM_t
                    RF_auc_score_list, RF_tpr_matrix, GB_auc_score_list, GB_tpr_matrix):
     # Draw diagonal reference line
     line_x_y = np.linspace(0, 1, 100)
-    plt.plot(line_x_y, line_x_y, color='red', alpha=0.7, linewidth=2.25, linestyle='dashed')
+    plt.plot(line_x_y, line_x_y, color='red', alpha=0.7, linewidth=2.25, linestyle='dashed',
+             label="Luck")
 
     base_fpr = np.linspace(0, 1, 101)
 
@@ -103,7 +104,7 @@ def plot_roc_curve(DNN_auc_score_list, DNN_tpr_matrix, SVM_auc_score_list, SVM_t
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
     plt.legend()
-    plt.title('ROC curve')
+    plt.title('Mean ROC curves')
     plt.grid()
     plt.savefig("../results/roc_curve.png")
     plt.show()

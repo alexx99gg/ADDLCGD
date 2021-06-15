@@ -113,7 +113,7 @@ for fold in folds:
     DNN_precision_list.append(DNN_precision)
     DNN_recall = recall_score(y_test, DNN_y_test_pred)
     DNN_recall_list.append(DNN_recall)
-    print(f"DNN Precision {DNN_precision:.2f} \t Recall {DNN_recall:.2f}")
+    print(f"DNN \t Precision {DNN_precision:.2f} \t Recall {DNN_recall:.2f} \t for fold {fold}")
 
     # ----- Support Vector Machine -----
     # Generate and train model
@@ -131,7 +131,7 @@ for fold in folds:
     SVM_precision_list.append(SVM_precision)
     SVM_recall = recall_score(y_test, SVM_y_test_pred)
     SVM_recall_list.append(SVM_recall)
-    print(f"SVM Precision {SVM_precision:.2f} \t Recall {SVM_recall:.2f}")
+    print(f"SVM \t Precision {SVM_precision:.2f} \t Recall {SVM_recall:.2f} \t for fold {fold}")
 
     # ----- Random Forest -----
     # Generate and train model
@@ -149,7 +149,7 @@ for fold in folds:
     RF_precision_list.append(RF_precision)
     RF_recall = recall_score(y_test, RF_y_test_pred)
     RF_recall_list.append(RF_recall)
-    print(f"RF Precision {RF_precision:.2f} \t Recall {RF_recall:.2f}")
+    print(f"RF \t Precision {RF_precision:.2f} \t Recall {RF_recall:.2f} \t for fold {fold}")
 
     # ----- Gradient Boosting -----
     # Generate and train model
@@ -167,7 +167,7 @@ for fold in folds:
     GB_precision_list.append(GB_precision)
     GB_recall = recall_score(y_test, GB_y_test_pred)
     GB_recall_list.append(GB_recall)
-    print(f"GB Precision {GB_precision:.2f} \t Recall {GB_recall:.2f}")
+    print(f"GB \t Precision {GB_precision:.2f} \t Recall {GB_recall:.2f} \t for fold {fold}")
 
     # ----- Calculate ROC curve ------
     DNN_auc_score = roc_auc_score(y_test, DNN_y_test_prob)
