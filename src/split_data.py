@@ -45,7 +45,7 @@ def main(argv):
     X = np.asarray(X)
     skf = StratifiedKFold(n_splits=splits, shuffle=True)
 
-    G = read_plink1_bin(plink_path + ".bed", plink_path + ".bim", plink_path + ".fam")
+    G = read_plink1_bin(plink_path + ".bed", plink_path + ".bim", plink_path + ".fam", verbose=False)
     split_i = 0
     for train_index, test_index in skf.split(X, y):
         split_i += 1
@@ -53,18 +53,21 @@ def main(argv):
         G_train = G.where(G.iid.isin(X_train), drop=True)
         G_test = G.where(G.iid.isin(X_test), drop=True)
 
-        write_plink1_bin(G_train, f"{out_file_root}_fold_{split_i}_train.bed")
-        write_plink1_bin(G_test, f"{out_file_root}_fold_{split_i}_test.bed")
+        write_plink1_bin(G_train, f"{out_file_root}_fold_{split_i}_train.bed", verbose=False)
+        write_plink1_bin(G_test, f"{out_file_root}_fold_{split_i}_test.bed", verbose=False)
 
         train_file_path = os.path.abspath(f"{out_file_root}_fold_{split_i}_train")
         test_file_path = os.path.abspath(f"{out_file_root}_fold_{split_i}_test")
 
         command1 = f"plink --bfile {train_file_path} --assoc fisher-midp --out {train_file_path}"
-        command2 = f"plink --bfile {train_file_path} --clump {train_file_path}.assoc.fisher --clump-best --clump-p1 {p1} --clump-r2 {r2} --out {train_file_path}"
+        command2 = f"plink --bfile {train_file_path} --clump {train_file_path}.assoc.fisher --clump-best --clump-p1 {p1} --clump-r2 {r2} --allow-no-sex --out {train_file_path}"
+
+        print("Executing command: ", command1)
         process1 = subprocess.Popen(command1, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         stdout, stderr = process1.communicate()
         print(stdout.decode('utf-8'), stderr.decode('utf-8'))
 
+        print("Executing command: ", command2)
         process2 = subprocess.Popen(command2, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         stdout, stderr = process2.communicate()
         print(stdout.decode('utf-8'), stderr.decode('utf-8'))

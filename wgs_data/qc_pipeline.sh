@@ -22,9 +22,9 @@ plink --bfile original/ADNI3 --exclude merged/ADNI12GO3-merge.missnp --make-bed 
 # --hwe 0.05: Hardy-Weinberg equilibrium
 # --clump-p1 0.001: Significance threshold for index SNPs
 # --clump-r2 0.05: LD threshold for clumping
-file="ADNI1GO2"
+file="ADNI1GO23"
 
-plink --bfile "original/${file}" --make-bed --missing-genotype N --chr 1-22  --out "cleaned/${file}"
+plink --bfile "merged/${file}" --make-bed --missing-genotype N --chr 1-22  --out "cleaned/${file}"
 plink --bfile "cleaned/${file}" --make-bed --missing-genotype N --rel-cutoff 0.05 --out "cleaned/${file}"
 plink --bfile "cleaned/${file}" --make-bed --missing-genotype N --maf 0.01 --geno 0.001 --hwe 0.05 --out "cleaned/${file}"
 # plink --bfile "merged/${file}" --make-bed --missing-genotype N --chr 1-22 --mind 0.1 --maf 0.01 --geno 0.001 --hwe 0.05 --out "cleaned/${file}"

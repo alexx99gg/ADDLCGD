@@ -138,6 +138,7 @@ def get_selected_snps(clumped_path):
     clump_headers = clump_file.columns.tolist()
     # Order by P value
     clump_file = clump_file.sort_values(by=["P"], ascending=True)
-    snp_list = clump_file.index.tolist()
+    snp_names = np.array(clump_file.index.tolist())
+    snp_p_values = np.array(clump_file['P'].tolist())
 
-    return snp_list
+    return snp_names, snp_p_values

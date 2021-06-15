@@ -10,12 +10,15 @@ from sklearn.utils import shuffle
 from tensorflow.python.keras.callbacks import EarlyStopping
 from xgboost import XGBClassifier
 
+from sklearn import metrics
+from sklearn.metrics import roc_auc_score, precision_score, recall_score
+
 from plot_utils import *
 from read_data import *
 from train_data import *
 
 dataset_path = "../wgs_data/subsets/"
-dataset = "ADNI1GO2"
+dataset = "ADNI1GO23"
 print(f"Reading dataset {dataset}")
 
 DNN_cm_sum = np.zeros((2, 2), dtype=np.int)
@@ -44,7 +47,7 @@ GB_tpr_matrix = []
 
 base_fpr = np.linspace(0, 1, 101)
 
-folds = [1, 2]
+folds = [1, 2, 3, 4, 5]
 for fold in folds:
     print()
     print(f"Fold number {fold}")
@@ -53,15 +56,16 @@ for fold in folds:
     test_path = f"{dataset_path}{dataset}_fold_{fold}_test"
 
     # Get SNPs to keep
-    snp_list = get_selected_snps(clumped_path)
+    selected_snp_names, selected_snp_p_values = get_selected_snps(clumped_path)
     # Get the first ones
-    snp_list = snp_list[:15]
-    print(f"{len(snp_list)} SNPs selected (in relevance order):")
-    print(snp_list)
+    selected_snp_names = selected_snp_names[:15]
+    selected_snp_p_values = selected_snp_p_values[:15]
+
+    plot_snp(selected_snp_names, selected_snp_p_values, fold)
 
     # Load train data
     (bim, fam, bed) = read_plink(train_path, verbose=False)
-    x_train, y_train = generate_dataset(bed, bim, fam, snp_list)
+    x_train, y_train = generate_dataset(bed, bim, fam, selected_snp_names)
     x_train, y_train = shuffle(x_train, y_train)
 
     n_train_samples = x_train.shape[0]
@@ -77,7 +81,7 @@ for fold in folds:
         # Load test file
         (bim_test, fam_test, bed_test) = read_plink(test_path, verbose=False)
         n_original_test_SNPs = bed.shape[0]
-        x_test, y_test = generate_dataset(bed_test, bim_test, fam_test, snp_list)
+        x_test, y_test = generate_dataset(bed_test, bim_test, fam_test, selected_snp_names)
         x_test, y_test = shuffle(x_test, y_test)
     else:
         # Extract and remove test data from train
@@ -102,7 +106,7 @@ for fold in folds:
     print("Training DNN model...")
     es = EarlyStopping(monitor='val_loss', mode='min', patience=25, restore_best_weights=False, verbose=0)
     history = DNN_model.fit(x_train, y_train, epochs=500, validation_split=0.15, callbacks=[es], verbose=0)
-    plot_training_history(history)
+    plot_training_history(history, fold)
 
     print("Evaluate DNN model...")
     DNN_y_test_prob = DNN_model.predict(x_test)
@@ -206,8 +210,8 @@ for fold in folds:
     ymax = max(max(x_train_2d[:, 1]), max(x_test_2d[:, 1])) + 0.2
     ymin = min(min(x_train_2d[:, 1]), min(x_test_2d[:, 1])) - 0.2
 
-    plot_2d_dataset(x_train_2d, y_train, xmin, xmax, ymin, ymax, "train")
-    plot_2d_dataset(x_test_2d, y_test, xmin, xmax, ymin, ymax, "test")
+    plot_2d_dataset(x_train_2d, y_train, xmin, xmax, ymin, ymax, "train", fold)
+    plot_2d_dataset(x_test_2d, y_test, xmin, xmax, ymin, ymax, "test", fold)
 
 # Plot confusion matrix
 plot_confusion_matrix(DNN_cm_sum, 'DNN sum')

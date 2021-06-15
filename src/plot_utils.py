@@ -2,13 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sn
-from sklearn import metrics
-from sklearn.metrics import roc_auc_score, auc, precision_score, recall_score
+from sklearn.metrics import auc
 
 plt.rcParams['font.size'] = '14'
 
 
-def plot_2d_dataset(x_2d, y, xmin, xmax, ymin, ymax, source: str):
+def plot_2d_dataset(x_2d, y, xmin, xmax, ymin, ymax, source: str, fold: int):
     x_alzheimer = []
     x_no_alzheimer = []
     for i in range(len(y)):
@@ -27,29 +26,32 @@ def plot_2d_dataset(x_2d, y, xmin, xmax, ymin, ymax, source: str):
     plt.legend()
     plt.title(f"{source} 2D data representation")
     plt.grid()
-    plt.savefig(f"../results/{source}_2d_data.png")
+    plt.tight_layout()
+    plt.savefig(f"../results/{source}_2d_data_fold_{fold}.png")
     plt.show()
 
 
-def plot_training_history(history):
+def plot_training_history(history, fold: int):
     # Accuracy history
     plt.plot(history.history['accuracy'], label='Train', color='blue', alpha=0.7, linewidth=3)
     plt.plot(history.history['val_accuracy'], label='Validation', color='red', alpha=0.7, linewidth=3)
     plt.legend()
-    plt.title('Training accuracy history')
+    plt.title(f"Training accuracy history for fold {fold}")
     plt.ylim(ymin=0, ymax=1)
     plt.grid()
-    plt.savefig("../results/training_accuracy_history.png")
+    plt.tight_layout()
+    plt.savefig(f"../results/training_accuracy_history_fold_{fold}.png")
     plt.show()
 
     # AUC history
     plt.plot(history.history['auc'], label='Train', color='blue', alpha=0.7, linewidth=3)
     plt.plot(history.history['val_auc'], label='Validation', color='red', alpha=0.7, linewidth=3)
     plt.legend()
-    plt.title('Training AUC history')
+    plt.title(f"Training AUC history for fold {fold}")
     plt.ylim(ymin=0, ymax=1)
     plt.grid()
-    plt.savefig("../results/training_auc_history.png")
+    plt.tight_layout()
+    plt.savefig(f"../results/training_auc_history_fold_{fold}.png")
     plt.show()
 
 
@@ -60,8 +62,9 @@ def plot_confusion_matrix(cm, model: str):
 
     plt.xlabel("Predicted labels")
     plt.ylabel("True labels")
-
     plt.title(f"{model} confusion matrix")
+
+    plt.tight_layout()
     plt.savefig(f"../results/{model}_confusion_matrix.png")
     plt.show()
 
@@ -106,5 +109,19 @@ def plot_roc_curve(DNN_auc_score_list, DNN_tpr_matrix, SVM_auc_score_list, SVM_t
     plt.legend()
     plt.title('Mean ROC curves')
     plt.grid()
+    plt.tight_layout()
     plt.savefig("../results/roc_curve.png")
+    plt.show()
+
+
+def plot_snp(selected_snp_names, selected_snp_p_values, fold: int):
+    fig, ax = plt.subplots()
+    ax.barh(selected_snp_names, selected_snp_p_values, color='blue')
+    plt.grid(axis='x')
+    ax.set_xscale('log')
+    ax.set_xlabel('P-value')
+    ax.set_ylabel('SNP name')
+    ax.set_title(f"Selected SNPs for fold {fold}")
+    plt.tight_layout()
+    plt.savefig(f"../results/snps_fold_{fold}.png")
     plt.show()
