@@ -1,9 +1,10 @@
+import keras.backend as K
 import tensorflow as tf
 from tensorflow.keras import initializers
 from tensorflow.keras import layers
 from tensorflow.keras import optimizers
 
-import keras.backend as K
+import settings
 
 
 def f1(y_true, y_pred):  # taken from old keras source code
@@ -63,7 +64,8 @@ def create_MLP_model(n_SNPs: int):
     # Dense with 2 outputs, sigmoid activation
     model.add(layers.Dense(1, activation='sigmoid'))
 
-    tf.keras.utils.plot_model(model, to_file='../results/DNN_model_plot.png', show_shapes=True, show_layer_names=True)
+    tf.keras.utils.plot_model(model, to_file=f"{settings.save_dir}DNN_model_plot.png", show_shapes=True,
+                              show_layer_names=True)
 
     # Compile the Neural Network
     model.compile(

@@ -4,6 +4,8 @@ import pandas as pd
 import seaborn as sn
 from sklearn.metrics import auc
 
+import settings
+
 plt.rcParams['font.size'] = '14'
 
 
@@ -27,7 +29,7 @@ def plot_2d_dataset(x_2d, y, xmin, xmax, ymin, ymax, source: str, fold: int):
     plt.title(f"{source} 2D data representation")
     plt.grid()
     plt.tight_layout()
-    plt.savefig(f"../results/{source}_2d_data_fold_{fold}.png")
+    plt.savefig(f"{settings.save_dir}{source}_2d_data_fold_{fold}.png")
     plt.show()
 
 
@@ -40,7 +42,7 @@ def plot_training_history(history, fold: int):
     plt.ylim(ymin=0, ymax=1)
     plt.grid()
     plt.tight_layout()
-    plt.savefig(f"../results/training_accuracy_history_fold_{fold}.png")
+    plt.savefig(f"{settings.save_dir}training_accuracy_history_fold_{fold}.png")
     plt.show()
 
     # AUC history
@@ -51,7 +53,7 @@ def plot_training_history(history, fold: int):
     plt.ylim(ymin=0, ymax=1)
     plt.grid()
     plt.tight_layout()
-    plt.savefig(f"../results/training_auc_history_fold_{fold}.png")
+    plt.savefig(f"{settings.save_dir}training_auc_history_fold_{fold}.png")
     plt.show()
 
 
@@ -65,7 +67,7 @@ def plot_confusion_matrix(cm, model: str):
     plt.title(f"{model} confusion matrix")
 
     plt.tight_layout()
-    plt.savefig(f"../results/{model}_confusion_matrix.png")
+    plt.savefig(f"{settings.save_dir}{model}_confusion_matrix.png")
     plt.show()
 
 
@@ -110,7 +112,7 @@ def plot_roc_curve(DNN_auc_score_list, DNN_tpr_matrix, SVM_auc_score_list, SVM_t
     plt.title('Mean ROC curves')
     plt.grid()
     plt.tight_layout()
-    plt.savefig("../results/roc_curve.png")
+    plt.savefig("{settings.save_dir}roc_curve.png")
     plt.show()
 
 
@@ -123,5 +125,5 @@ def plot_snp(selected_snp_names, selected_snp_p_values, fold: int):
     ax.set_ylabel('SNP name')
     ax.set_title(f"Selected SNPs for fold {fold}")
     plt.tight_layout()
-    plt.savefig(f"../results/snps_fold_{fold}.png")
+    plt.savefig(f"{settings.save_dir}snps_fold_{fold}.png")
     plt.show()

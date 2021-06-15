@@ -1,8 +1,7 @@
 import sys
 
-import pandas
-
 from read_data import *
+
 
 def main(argv):
     # read params

@@ -1,25 +1,21 @@
-import numpy as np
 from pandas_plink import read_plink
+from sklearn import metrics
 from sklearn.decomposition import PCA
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import roc_auc_score, precision_score, recall_score
 from sklearn.metrics import roc_curve
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 from sklearn.utils import shuffle
 from tensorflow.python.keras.callbacks import EarlyStopping
-from xgboost import XGBClassifier
 
-from sklearn import metrics
-from sklearn.metrics import roc_auc_score, precision_score, recall_score
-
+import settings
 from plot_utils import *
 from read_data import *
 from train_data import *
 
-dataset_path = "../wgs_data/subsets/"
-dataset = "ADNI1GO23"
-print(f"Reading dataset {dataset}")
+print(f"Reading dataset {settings.dataset}")
 
 DNN_cm_sum = np.zeros((2, 2), dtype=np.int)
 DNN_precision_list = []
@@ -51,15 +47,15 @@ folds = [1, 2, 3, 4, 5]
 for fold in folds:
     print()
     print(f"Fold number {fold}")
-    clumped_path = f"{dataset_path}{dataset}_fold_{fold}_train.assoc.fisher"
-    train_path = f"{dataset_path}{dataset}_fold_{fold}_train"
-    test_path = f"{dataset_path}{dataset}_fold_{fold}_test"
+    clumped_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_train.assoc.fisher"
+    train_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_train"
+    test_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_test"
 
     # Get SNPs to keep
     selected_snp_names, selected_snp_p_values = get_selected_snps(clumped_path)
     # Get the first ones
-    selected_snp_names = selected_snp_names[:15]
-    selected_snp_p_values = selected_snp_p_values[:15]
+    selected_snp_names = selected_snp_names[:settings.n_SNPs]
+    selected_snp_p_values = selected_snp_p_values[:settings.n_SNPs]
 
     plot_snp(selected_snp_names, selected_snp_p_values, fold)
 
