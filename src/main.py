@@ -18,22 +18,35 @@ dataset_path = "../wgs_data/subsets/"
 dataset = "ADNI1GO2"
 print(f"Reading dataset {dataset}")
 
+DNN_cm_sum = np.zeros((2, 2), dtype=np.int)
+DNN_precision_list = []
+DNN_recall_list = []
 DNN_auc_score_list = []
 DNN_tpr_matrix = []
 
+SVM_cm_sum = np.zeros((2, 2), dtype=np.int)
+SVM_precision_list = []
+SVM_recall_list = []
 SVM_auc_score_list = []
 SVM_tpr_matrix = []
 
+RF_cm_sum = np.zeros((2, 2), dtype=np.int)
+RF_precision_list = []
+RF_recall_list = []
 RF_auc_score_list = []
 RF_tpr_matrix = []
 
+GB_cm_sum = np.zeros((2, 2), dtype=np.int)
+GB_precision_list = []
+GB_recall_list = []
 GB_auc_score_list = []
 GB_tpr_matrix = []
 
 base_fpr = np.linspace(0, 1, 101)
 
-folds = [1, 2, 3, 4, 5]
+folds = [1, 2]
 for fold in folds:
+    print()
     print(f"Fold number {fold}")
     clumped_path = f"{dataset_path}{dataset}_fold_{fold}_train.assoc.fisher"
     train_path = f"{dataset_path}{dataset}_fold_{fold}_train"
@@ -94,7 +107,13 @@ for fold in folds:
     print("Evaluate DNN model...")
     DNN_y_test_prob = DNN_model.predict(x_test)
     DNN_y_test_pred = (DNN_y_test_prob > 0.5).astype("int32")
-    plot_confusion_matrix(y_test, DNN_y_test_prob, DNN_y_test_pred, "DNN")
+    DNN_cm = metrics.confusion_matrix(y_test, DNN_y_test_pred)
+    DNN_cm_sum += DNN_cm
+    DNN_precision = precision_score(y_test, DNN_y_test_pred)
+    DNN_precision_list.append(DNN_precision)
+    DNN_recall = recall_score(y_test, DNN_y_test_pred)
+    DNN_recall_list.append(DNN_recall)
+    print(f"DNN Precision {DNN_precision:.2f} \t Recall {DNN_recall:.2f}")
 
     # ----- Support Vector Machine -----
     # Generate and train model
@@ -106,7 +125,13 @@ for fold in folds:
     SVM_y_test_prob = SVM_model.predict_proba(x_test)
     SVM_y_test_prob = SVM_y_test_prob[:, 1]
     SVM_y_test_pred = SVM_model.predict(x_test)
-    plot_confusion_matrix(y_test, SVM_y_test_prob, SVM_y_test_pred, "SVM")
+    SVM_cm = metrics.confusion_matrix(y_test, SVM_y_test_pred)
+    SVM_cm_sum += SVM_cm
+    SVM_precision = precision_score(y_test, SVM_y_test_pred)
+    SVM_precision_list.append(SVM_precision)
+    SVM_recall = recall_score(y_test, SVM_y_test_pred)
+    SVM_recall_list.append(SVM_recall)
+    print(f"SVM Precision {SVM_precision:.2f} \t Recall {SVM_recall:.2f}")
 
     # ----- Random Forest -----
     # Generate and train model
@@ -118,7 +143,13 @@ for fold in folds:
     RF_y_test_prob = RF_model.predict_proba(x_test)
     RF_y_test_prob = RF_y_test_prob[:, 1]
     RF_y_test_pred = RF_model.predict(x_test)
-    plot_confusion_matrix(y_test, RF_y_test_prob, RF_y_test_pred, 'RF')
+    RF_cm = metrics.confusion_matrix(y_test, RF_y_test_pred)
+    RF_cm_sum += RF_cm
+    RF_precision = precision_score(y_test, RF_y_test_pred)
+    RF_precision_list.append(RF_precision)
+    RF_recall = recall_score(y_test, RF_y_test_pred)
+    RF_recall_list.append(RF_recall)
+    print(f"RF Precision {RF_precision:.2f} \t Recall {RF_recall:.2f}")
 
     # ----- Gradient Boosting -----
     # Generate and train model
@@ -130,10 +161,15 @@ for fold in folds:
     GB_y_test_prob = GB_model.predict_proba(x_test)
     GB_y_test_prob = GB_y_test_prob[:, 1]
     GB_y_test_pred = GB_model.predict(x_test)
-    plot_confusion_matrix(y_test, GB_y_test_prob, GB_y_test_pred, 'GB')
+    GB_cm = metrics.confusion_matrix(y_test, GB_y_test_pred)
+    GB_cm_sum += GB_cm
+    GB_precision = precision_score(y_test, GB_y_test_pred)
+    GB_precision_list.append(GB_precision)
+    GB_recall = recall_score(y_test, GB_y_test_pred)
+    GB_recall_list.append(GB_recall)
+    print(f"GB Precision {GB_precision:.2f} \t Recall {GB_recall:.2f}")
 
     # ----- Calculate ROC curve ------
-
     DNN_auc_score = roc_auc_score(y_test, DNN_y_test_prob)
     DNN_fpr, DNN_tpr, _ = roc_curve(y_test, DNN_y_test_prob)
     DNN_tpr = np.interp(base_fpr, DNN_fpr, DNN_tpr)
@@ -173,10 +209,11 @@ for fold in folds:
     plot_2d_dataset(x_train_2d, y_train, xmin, xmax, ymin, ymax, "train")
     plot_2d_dataset(x_test_2d, y_test, xmin, xmax, ymin, ymax, "test")
 
-DNN_tpr_matrix = np.array(DNN_tpr_matrix)
-SVM_tpr_matrix = np.array(SVM_tpr_matrix)
-RF_tpr_matrix = np.array(RF_tpr_matrix)
-GB_tpr_matrix = np.array(GB_tpr_matrix)
+# Plot confusion matrix
+plot_confusion_matrix(DNN_cm_sum, 'DNN sum')
+plot_confusion_matrix(SVM_cm_sum, 'SVM sum')
+plot_confusion_matrix(RF_cm_sum, 'RF sum')
+plot_confusion_matrix(GB_cm_sum, 'GB sum')
 
 # Finally plot ROC curve
 plot_roc_curve(DNN_auc_score_list, DNN_tpr_matrix, SVM_auc_score_list, SVM_tpr_matrix,

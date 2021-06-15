@@ -53,8 +53,7 @@ def plot_training_history(history):
     plt.show()
 
 
-def plot_confusion_matrix(y, y_prob, y_pred, model: str):
-    cm = metrics.confusion_matrix(y, y_pred)
+def plot_confusion_matrix(cm, model: str):
     df_cm = pd.DataFrame(cm, index=["CN", "AD"], columns=["CN", "AD"])
 
     sn.heatmap(df_cm, vmin=0, vmax=np.max(np.sum(cm, axis=1)), annot=True, cmap='Purples', fmt='d')
@@ -66,12 +65,6 @@ def plot_confusion_matrix(y, y_prob, y_pred, model: str):
     plt.savefig(f"../results/{model}_confusion_matrix.png")
     plt.show()
 
-    precision = precision_score(y, y_pred)
-    recall = recall_score(y, y_pred)
-    auc = roc_auc_score(y, y_prob)
-
-    print(f"{model} Precision {precision:.2f} Recall {recall:.2f} AUC {auc:.2f}")
-
 
 def plot_roc_curve(DNN_auc_score_list, DNN_tpr_matrix, SVM_auc_score_list, SVM_tpr_matrix,
                    RF_auc_score_list, RF_tpr_matrix, GB_auc_score_list, GB_tpr_matrix):
@@ -81,10 +74,10 @@ def plot_roc_curve(DNN_auc_score_list, DNN_tpr_matrix, SVM_auc_score_list, SVM_t
 
     base_fpr = np.linspace(0, 1, 101)
 
-    DNN_mean_tpr = DNN_tpr_matrix.mean(axis=0)
-    SVM_mean_tpr = SVM_tpr_matrix.mean(axis=0)
-    RF_mean_tpr = RF_tpr_matrix.mean(axis=0)
-    GB_mean_tpr = GB_tpr_matrix.mean(axis=0)
+    DNN_mean_tpr = np.mean(DNN_tpr_matrix, axis=0)
+    SVM_mean_tpr = np.mean(SVM_tpr_matrix, axis=0)
+    RF_mean_tpr = np.mean(RF_tpr_matrix, axis=0)
+    GB_mean_tpr = np.mean(GB_tpr_matrix, axis=0)
 
     DNN_mean_auc_score = auc(base_fpr, DNN_mean_tpr)
     SVM_mean_auc_score = auc(base_fpr, SVM_mean_tpr)
