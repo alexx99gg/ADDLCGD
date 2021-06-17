@@ -47,7 +47,7 @@ folds = [1, 2, 3, 4, 5]
 for fold in folds:
     print()
     print(f"Fold number {fold}")
-    clumped_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_train.clumped"
+    clumped_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_trainp_{settings.p1}.clumped"
     assoc_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_train.assoc.fisher"
     train_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_train"
     test_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_test"
@@ -55,8 +55,6 @@ for fold in folds:
     # Get SNPs to keep from clump file
     selected_snp_names, selected_snp_p_values = get_selected_snps(clumped_path)
     # Get the first ones
-    selected_snp_names = selected_snp_names[:settings.n_SNPs]
-    selected_snp_p_values = selected_snp_p_values[:settings.n_SNPs]
     plot_snp(selected_snp_names, selected_snp_p_values, fold)
 
     # Manhattan plot of assoc study
@@ -85,6 +83,7 @@ for fold in folds:
         x_test, y_test = shuffle(x_test, y_test)
     else:
         # Extract and remove test data from train
+        print("WARNING: Test data is going to be extracted from Train data, used in GWAS study")
         x_train, x_test, y_train, y_test = train_test_split(x_train, y_train, test_size=0.15, shuffle=True)
 
     n_test_samples = x_test.shape[0]
@@ -213,10 +212,10 @@ for fold in folds:
     plot_2d_dataset(x_test_2d, y_test, xmin, xmax, ymin, ymax, "test", fold)
 
 # Plot confusion matrix
-plot_confusion_matrix(DNN_cm_sum, 'DNN sum')
-plot_confusion_matrix(SVM_cm_sum, 'SVM sum')
-plot_confusion_matrix(RF_cm_sum, 'RF sum')
-plot_confusion_matrix(GB_cm_sum, 'GB sum')
+plot_confusion_matrix(DNN_cm_sum, 'DNN')
+plot_confusion_matrix(SVM_cm_sum, 'SVM')
+plot_confusion_matrix(RF_cm_sum, 'RF')
+plot_confusion_matrix(GB_cm_sum, 'GB')
 
 # Finally plot ROC curve
 plot_roc_curve(DNN_auc_score_list, DNN_tpr_matrix, SVM_auc_score_list, SVM_tpr_matrix,

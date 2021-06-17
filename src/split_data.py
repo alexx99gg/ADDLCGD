@@ -10,15 +10,14 @@ from read_data import *
 
 def main(argv):
     # read params
-    if len(argv) != 5:
-        print("Usage: python3 split_data.py plink_file splits p1 r2 out_file_root")
+    if len(argv) != 4:
+        print("Usage: python3 split_data.py plink_file splits r2 out_file_root")
         exit(2)
 
     plink_path = argv[0]
     splits = int(argv[1])
-    p1 = float(argv[2])
-    r2 = float(argv[3])
-    out_file_root = argv[4]
+    r2 = float(argv[2])
+    out_file_root = argv[3]
 
     # Read fam file
     fam_file = pandas.read_csv(plink_path + '.fam', names=['FID', 'IID', 'father', 'mother', 'sex', 'phenotype'],
@@ -58,17 +57,17 @@ def main(argv):
         test_file_path = os.path.abspath(f"{out_file_root}_fold_{split_i}_test")
 
         command1 = f"plink --bfile {train_file_path} --assoc fisher-midp --out {train_file_path}"
-        command2 = f"plink --bfile {train_file_path} --clump {train_file_path}.assoc.fisher --clump-best --clump-p1 {p1} --clump-r2 {r2} --allow-no-sex --out {train_file_path}"
-
         print("Executing command: ", command1)
         process1 = subprocess.Popen(command1, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         stdout, stderr = process1.communicate()
         print(stdout.decode('utf-8'), stderr.decode('utf-8'))
 
-        print("Executing command: ", command2)
-        process2 = subprocess.Popen(command2, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        stdout, stderr = process2.communicate()
-        print(stdout.decode('utf-8'), stderr.decode('utf-8'))
+        for p1 in [5e-8, 1e-5, 1e-4, 1e-3, 1e-2]:
+            command2 = f"plink --bfile {train_file_path} --clump {train_file_path}.assoc.fisher --clump-best --clump-p1 {p1} --clump-r2 {r2} --allow-no-sex --out {train_file_path}_p1_{p1}"
+            print("Executing command: ", command2)
+            process2 = subprocess.Popen(command2, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            stdout, stderr = process2.communicate()
+            print(stdout.decode('utf-8'), stderr.decode('utf-8'))
 
 
 if __name__ == "__main__":
