@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sn
+from qqman import qqman
 from sklearn.metrics import auc
 
 import settings
@@ -73,10 +74,6 @@ def plot_confusion_matrix(cm, model: str):
 
 def plot_roc_curve(DNN_auc_score_list, DNN_tpr_matrix, SVM_auc_score_list, SVM_tpr_matrix,
                    RF_auc_score_list, RF_tpr_matrix, GB_auc_score_list, GB_tpr_matrix):
-    # Draw diagonal reference line
-    line_x_y = np.linspace(0, 1, 100)
-    plt.plot(line_x_y, line_x_y, color='red', alpha=0.7, linewidth=2.25, linestyle='dashed',
-             label="Luck")
 
     base_fpr = np.linspace(0, 1, 101)
 
@@ -105,6 +102,11 @@ def plot_roc_curve(DNN_auc_score_list, DNN_tpr_matrix, SVM_auc_score_list, SVM_t
     plt.plot(base_fpr, GB_mean_tpr, linewidth=3, color='green', alpha=0.7,
              label=f"GB (mean AUC {GB_mean_auc_score:.2f} $\pm$ {GB_std_auc:.2f})")
 
+    # Draw diagonal reference line
+    line_x_y = np.linspace(0, 1, 100)
+    plt.plot(line_x_y, line_x_y, color='red', alpha=0.7, linewidth=2.25, linestyle='dashed',
+             label="Luck")
+
     plt.axis([0, 1, 0, 1])
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
@@ -112,7 +114,7 @@ def plot_roc_curve(DNN_auc_score_list, DNN_tpr_matrix, SVM_auc_score_list, SVM_t
     plt.title('Mean ROC curves')
     plt.grid()
     plt.tight_layout()
-    plt.savefig("{settings.save_dir}roc_curve.png")
+    plt.savefig(f"{settings.save_dir}roc_curve.png")
     plt.show()
 
 
@@ -127,3 +129,9 @@ def plot_snp(selected_snp_names, selected_snp_p_values, fold: int):
     plt.tight_layout()
     plt.savefig(f"{settings.save_dir}snps_fold_{fold}.png")
     plt.show()
+
+
+def plot_manhattan(assoc_path, fold):
+    qqman.manhattan(assoc_path, title=f"Manhattan plot of fold {fold}", show=True,
+                    out=f"{settings.save_dir}manhattan_fold_{fold}.png", cmap=plt.get_cmap('turbo'),
+                    cmap_var=7)

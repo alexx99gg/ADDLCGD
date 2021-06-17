@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 from pandas_plink import read_plink
 from sklearn import metrics
 from sklearn.decomposition import PCA
@@ -10,7 +11,6 @@ from sklearn.svm import SVC
 from sklearn.utils import shuffle
 from tensorflow.python.keras.callbacks import EarlyStopping
 
-import settings
 from plot_utils import *
 from read_data import *
 from train_data import *
@@ -47,27 +47,31 @@ folds = [1, 2, 3, 4, 5]
 for fold in folds:
     print()
     print(f"Fold number {fold}")
-    clumped_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_train.assoc.fisher"
+    clumped_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_train.clumped"
+    assoc_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_train.assoc.fisher"
     train_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_train"
     test_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_test"
 
-    # Get SNPs to keep
+    # Get SNPs to keep from clump file
     selected_snp_names, selected_snp_p_values = get_selected_snps(clumped_path)
     # Get the first ones
     selected_snp_names = selected_snp_names[:settings.n_SNPs]
     selected_snp_p_values = selected_snp_p_values[:settings.n_SNPs]
-
     plot_snp(selected_snp_names, selected_snp_p_values, fold)
+
+    # Manhattan plot of assoc study
+    plot_manhattan(assoc_path, fold)
 
     # Load train data
     (bim, fam, bed) = read_plink(train_path, verbose=False)
+    n_original_SNPs = bed.shape[0]
     x_train, y_train = generate_dataset(bed, bim, fam, selected_snp_names)
     x_train, y_train = shuffle(x_train, y_train)
 
     n_train_samples = x_train.shape[0]
     n_train_SNPs = x_train.shape[1]
 
-    print(f"Number of SNPs in train: {n_train_SNPs}")
+    print(f"Number of SNPs selected in train: {n_train_SNPs} from {n_original_SNPs} originally")
     n_control_train, n_case_train = count_case_control(y_train)
     print(f"Number of samples in train: {n_train_samples}: {n_control_train} controls, {n_case_train} cases")
     print()
@@ -85,7 +89,6 @@ for fold in folds:
 
     n_test_samples = x_test.shape[0]
     n_test_SNPs = x_test.shape[1]
-    print(f"Number of SNPs in test: {n_test_SNPs}")
     n_control_test, n_case_test = count_case_control(y_test)
     print(f"Number of samples in test: {n_test_samples}: {n_control_test} controls, {n_case_test} cases")
     print()

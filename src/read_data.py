@@ -116,7 +116,7 @@ def generate_dataset(bed, bim, fam, snp_list):
     #   1 -> Heterozygous
     #   2 -> Second allele
     #   math.nan -> missing genotype
-    x = np.nan_to_num(x, 1.5)
+    x = np.nan_to_num(x, 2)  # Change missing genotype to second allele (most common allele usually)
     # Normalize [0..1]
     n_final_snps = x.shape[1]
     if n_final_snps > 0:

@@ -10,22 +10,19 @@ from read_data import *
 
 def main(argv):
     # read params
-    if len(argv) != 6:
-        print("Usage: python3 split_data.py plink_file diagnose_file splits p1 r2 out_file_root")
+    if len(argv) != 5:
+        print("Usage: python3 split_data.py plink_file splits p1 r2 out_file_root")
         exit(2)
 
     plink_path = argv[0]
-    diagnose_path = argv[1]
-    splits = int(argv[2])
-    p1 = float(argv[3])
-    r2 = float(argv[4])
-    out_file_root = argv[5]
+    splits = int(argv[1])
+    p1 = float(argv[2])
+    r2 = float(argv[3])
+    out_file_root = argv[4]
 
     # Read fam file
     fam_file = pandas.read_csv(plink_path + '.fam', names=['FID', 'IID', 'father', 'mother', 'sex', 'phenotype'],
                                index_col='IID', delimiter=' ')
-    diagnostic_dict = read_diagnose(file_path=diagnose_path)
-
     # None
     X = []
     # y label used for the stratification
@@ -33,11 +30,11 @@ def main(argv):
 
     for key, data in fam_file.iterrows():
         IID = key
-        diagnose = diagnostic_dict[IID]
+        diagnose = data['phenotype']
         if diagnose == 1:
             X.append(IID)
             y.append(0)
-        elif diagnose == 3:
+        elif diagnose == 2:
             X.append(IID)
             y.append(1)
         else:
