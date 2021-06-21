@@ -1,4 +1,5 @@
 import sys
+import pandas as pd
 
 from read_data import *
 
@@ -15,9 +16,8 @@ def main(argv):
     diagnostic_dict = read_diagnose(diagnosis_file)
 
     # Read file
-    file = pandas.read_csv(fam_file, names=['FID', 'IID', 'father', 'mother', 'sex', 'phenotype'], index_col='IID',
+    file = pd.read_csv(fam_file, names=['FID', 'IID', 'father', 'mother', 'sex', 'phenotype'], index_col='IID',
                            delimiter=' ')
-    headers = file.columns.tolist()
 
     out_file = open(fam_file, 'w+')
     n_CN = 0
@@ -25,11 +25,11 @@ def main(argv):
     n_AD = 0
 
     for key, data in file.iterrows():
-        FID = data[headers.index('FID')]
+        FID = data['FID']
         IID = key
-        father = data[headers.index('father')]
-        mother = data[headers.index('mother')]
-        sex = data[headers.index('sex')]
+        father = data['father']
+        mother = data['mother']
+        sex = data['sex']
 
         last_diagnose = diagnostic_dict[key]
         # According to plink, phenotype data values:

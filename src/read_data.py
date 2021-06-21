@@ -2,26 +2,25 @@ import math
 
 import dask
 import numpy as np
-import pandas
+import pandas as pd
 
 dask.config.set({"array.slicing.split_large_chunks": False})
 
 
 def read_diagnose(file_path: str = '../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv', verbose=False):
     # Read diagnostic summary
-    diagnostic_summary = pandas.read_csv(file_path, index_col='PTID')
-    diagnostic_summary_headers = diagnostic_summary.columns.tolist()
+    diagnostic_summary = pd.read_csv(file_path, index_col='PTID')
     diagnostic_summary = diagnostic_summary.sort_values(by=["update_stamp"], ascending=True)
     # Create dictionary
     diagnostic_dict: dict = {}
     for key, data in diagnostic_summary.iterrows():
         # Iterate for each row of the document
-        phase: str = data[diagnostic_summary_headers.index('Phase')]
+        phase: str = data['Phase']
         diagnosis: float = -1.
         if phase == "ADNI1":
-            diagnosis = data[diagnostic_summary_headers.index('DXCURREN')]
+            diagnosis = data['DXCURREN']
         elif phase == "ADNI2" or phase == "ADNIGO":
-            dxchange = data[diagnostic_summary_headers.index('DXCHANGE')]
+            dxchange = data['DXCHANGE']
             if dxchange == 1 or dxchange == 7 or dxchange == 9:
                 diagnosis = 1.
             if dxchange == 2 or dxchange == 4 or dxchange == 8:
@@ -29,7 +28,7 @@ def read_diagnose(file_path: str = '../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv'
             if dxchange == 3 or dxchange == 5 or dxchange == 6:
                 diagnosis = 3.
         elif phase == "ADNI3":
-            diagnosis = data[diagnostic_summary_headers.index('DIAGNOSIS')]
+            diagnosis = data['DIAGNOSIS']
         else:
             print(f"ERROR: Not recognized study phase {phase}")
             exit(1)
@@ -89,16 +88,13 @@ def generate_dataset(bed, bim, fam, snp_list):
 
     # Keep SNPs in snp_list only
     snps_to_keep = [False] * n_snps
-    snps_not_found = 0
     for snp in snp_list:
         index = bim[bim['snp'] == snp].index
         if len(index) == 0:
-            snps_not_found += 1
-            continue
+            print(f"ERROR: SNP from keep list not found: {snp}")
+            exit(1)
         index = index[0]
         snps_to_keep[index] = True
-    if snps_not_found > 0:
-        print(f"WARNING: SNPs from keep list not found: {snps_not_found}")
 
     # Filtering
     bed = bed[:, samples_to_keep]
@@ -123,7 +119,8 @@ def generate_dataset(bed, bim, fam, snp_list):
         x = (x - np.min(x)) / np.ptp(x)
     # x = x[:, ~np.isnan(x).any(axis=0)] # Remove NaN values
 
-    return x, y
+    x_dataframe = pd.DataFrame(data=x, columns=snp_list)
+    return x_dataframe, y
 
 
 def count_case_control(y):
@@ -134,8 +131,7 @@ def count_case_control(y):
 
 
 def get_selected_snps(clumped_path):
-    clump_file = pandas.read_csv(clumped_path, index_col='SNP', delimiter=r" +", engine='python')
-    clump_headers = clump_file.columns.tolist()
+    clump_file = pd.read_csv(clumped_path, index_col='SNP', delimiter=r" +", engine='python')
     # Order by P value
     clump_file = clump_file.sort_values(by=["P"], ascending=True)
     snp_names = np.array(clump_file.index.tolist())

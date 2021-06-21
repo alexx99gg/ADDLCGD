@@ -27,7 +27,7 @@ def plot_2d_dataset(x_2d, y, xmin, xmax, ymin, ymax, source: str, fold: int):
     plt.xlim(xmin=xmin, xmax=xmax)
     plt.ylim(ymin=ymin, ymax=ymax)
     plt.legend()
-    plt.title(f"{source} 2D data representation")
+    plt.title(f"{source} 2D data representation for fold {fold}")
     plt.grid()
     plt.tight_layout()
     plt.savefig(f"{settings.save_dir}{source}_2d_data_fold_{fold}.png")
@@ -68,7 +68,7 @@ def plot_confusion_matrix(cm, model: str):
     plt.title(f"{model} confusion matrix")
 
     plt.tight_layout()
-    plt.savefig(f"{settings.save_dir}{model}_confusion_matrix.png")
+    plt.savefig(f"{settings.save_dir}{model}_confusion_matrix_fold.png")
     plt.show()
 
 

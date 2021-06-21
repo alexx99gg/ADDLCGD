@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import pandas as pd
 
 from pandas_plink import read_plink1_bin, write_plink1_bin
 from sklearn.model_selection import StratifiedKFold
@@ -20,7 +21,7 @@ def main(argv):
     out_file_root = argv[3]
 
     # Read fam file
-    fam_file = pandas.read_csv(plink_path + '.fam', names=['FID', 'IID', 'father', 'mother', 'sex', 'phenotype'],
+    fam_file = pd.read_csv(plink_path + '.fam', names=['FID', 'IID', 'father', 'mother', 'sex', 'phenotype'],
                                index_col='IID', delimiter=' ')
     # None
     X = []

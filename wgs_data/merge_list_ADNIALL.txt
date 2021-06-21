@@ -1,0 +1,5 @@
+original_no_fam/ADNI1
+original_no_fam/ADNIGO2Forward
+original_no_fam/ADNIGO2Orig
+original_no_fam/ADNI1GO2
+original_no_fam/ADNI3_fixSNP

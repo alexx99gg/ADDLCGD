@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+import shap
 from pandas_plink import read_plink
 from sklearn import metrics
 from sklearn.decomposition import PCA
@@ -47,7 +47,7 @@ folds = [1, 2, 3, 4, 5]
 for fold in folds:
     print()
     print(f"Fold number {fold}")
-    clumped_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_trainp_{settings.p1}.clumped"
+    clumped_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_train_p1_{settings.p1}.clumped"
     assoc_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_train.assoc.fisher"
     train_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_train"
     test_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_test"
@@ -102,7 +102,7 @@ for fold in folds:
     print("Creating DNN model...")
     DNN_model = create_MLP_model(n_train_SNPs)
     print("Training DNN model...")
-    es = EarlyStopping(monitor='val_loss', mode='min', patience=25, restore_best_weights=False, verbose=0)
+    es = EarlyStopping(monitor='val_loss', mode='min', patience=50, restore_best_weights=True, verbose=0)
     history = DNN_model.fit(x_train, y_train, epochs=500, validation_split=0.15, callbacks=[es], verbose=0)
     plot_training_history(history, fold)
 
@@ -198,18 +198,19 @@ for fold in folds:
 
     # ----- Represent data to 2D -----
     # Reduce to two dimension via Primary Component Analysis
-    pca = PCA(n_components=2)
-    pca = pca.fit(x_train)
-    x_train_2d = pca.transform(x_train)
-    x_test_2d = pca.transform(x_test)
+    if n_train_SNPs > 1:
+        pca = PCA(n_components=2)
+        pca = pca.fit(x_train)
+        x_train_2d = pca.transform(x_train)
+        x_test_2d = pca.transform(x_test)
 
-    xmax = max(max(x_train_2d[:, 0]), max(x_test_2d[:, 0])) + 0.2
-    xmin = min(min(x_train_2d[:, 0]), min(x_test_2d[:, 0])) - 0.2
-    ymax = max(max(x_train_2d[:, 1]), max(x_test_2d[:, 1])) + 0.2
-    ymin = min(min(x_train_2d[:, 1]), min(x_test_2d[:, 1])) - 0.2
+        xmax = max(max(x_train_2d[:, 0]), max(x_test_2d[:, 0])) + 0.2
+        xmin = min(min(x_train_2d[:, 0]), min(x_test_2d[:, 0])) - 0.2
+        ymax = max(max(x_train_2d[:, 1]), max(x_test_2d[:, 1])) + 0.2
+        ymin = min(min(x_train_2d[:, 1]), min(x_test_2d[:, 1])) - 0.2
 
-    plot_2d_dataset(x_train_2d, y_train, xmin, xmax, ymin, ymax, "train", fold)
-    plot_2d_dataset(x_test_2d, y_test, xmin, xmax, ymin, ymax, "test", fold)
+        plot_2d_dataset(x_train_2d, y_train, xmin, xmax, ymin, ymax, "train", fold)
+        plot_2d_dataset(x_test_2d, y_test, xmin, xmax, ymin, ymax, "test", fold)
 
 # Plot confusion matrix
 plot_confusion_matrix(DNN_cm_sum, 'DNN')
