@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sn
+import shap
 from qqman import qqman
 from sklearn.metrics import auc
 
@@ -58,23 +59,22 @@ def plot_training_history(history, fold: int):
     plt.show()
 
 
-def plot_confusion_matrix(cm, model: str):
+def plot_confusion_matrix(cm, model_name: str):
     df_cm = pd.DataFrame(cm, index=["CN", "AD"], columns=["CN", "AD"])
 
     sn.heatmap(df_cm, vmin=0, vmax=np.max(np.sum(cm, axis=1)), annot=True, cmap='Purples', fmt='d')
 
     plt.xlabel("Predicted labels")
     plt.ylabel("True labels")
-    plt.title(f"{model} confusion matrix")
+    plt.title(f"{model_name} confusion matrix")
 
     plt.tight_layout()
-    plt.savefig(f"{settings.save_dir}{model}_confusion_matrix_fold.png")
+    plt.savefig(f"{settings.save_dir}{model_name}_confusion_matrix_fold.png")
     plt.show()
 
 
 def plot_roc_curve(DNN_auc_score_list, DNN_tpr_matrix, SVM_auc_score_list, SVM_tpr_matrix,
                    RF_auc_score_list, RF_tpr_matrix, GB_auc_score_list, GB_tpr_matrix):
-
     base_fpr = np.linspace(0, 1, 101)
 
     DNN_mean_tpr = np.mean(DNN_tpr_matrix, axis=0)
@@ -105,7 +105,7 @@ def plot_roc_curve(DNN_auc_score_list, DNN_tpr_matrix, SVM_auc_score_list, SVM_t
     # Draw diagonal reference line
     line_x_y = np.linspace(0, 1, 100)
     plt.plot(line_x_y, line_x_y, color='red', alpha=0.7, linewidth=2.25, linestyle='dashed',
-             label="Luck")
+             label="Chance")
 
     plt.axis([0, 1, 0, 1])
     plt.xlabel('False Positive Rate')
@@ -120,12 +120,12 @@ def plot_roc_curve(DNN_auc_score_list, DNN_tpr_matrix, SVM_auc_score_list, SVM_t
 
 def plot_snp(selected_snp_names, selected_snp_p_values, fold: int):
     fig, ax = plt.subplots()
-    ax.barh(selected_snp_names, selected_snp_p_values, color='blue')
+    ax.barh(selected_snp_names, selected_snp_p_values, color='blue', height=0.7)
     plt.grid(axis='x')
     ax.set_xscale('log')
     ax.set_xlabel('P-value')
     ax.set_ylabel('SNP name')
-    ax.set_title(f"Selected SNPs for fold {fold}")
+    ax.set_title(f"SNPs p-values in GWAS for fold {fold}")
     plt.tight_layout()
     plt.savefig(f"{settings.save_dir}snps_fold_{fold}.png")
     plt.show()
@@ -135,3 +135,26 @@ def plot_manhattan(assoc_path, fold):
     qqman.manhattan(assoc_path, title=f"Manhattan plot of fold {fold}", show=True,
                     out=f"{settings.save_dir}manhattan_fold_{fold}.png", cmap=plt.get_cmap('turbo'),
                     cmap_var=7)
+
+
+def plot_gb_importance(GB_model, selected_snp_names, fold: int):
+    fig, ax = plt.subplots()
+    plt.barh(selected_snp_names, GB_model.feature_importances_, color='blue', height=0.7)
+    plt.title(f"SNPs importances in GB for fold {fold}")
+    ax.set_xlabel('Importance')
+    ax.set_ylabel('SNP name')
+    plt.tight_layout()
+    plt.savefig(f"{settings.save_dir}feature_importance_gb_fold_{fold}.png")
+    plt.show()
+
+def plot_shap(model, X, fold: int, model_name: str):
+    explainer = shap.KernelExplainer(model=model, data=X.head(50), link="identity")
+    shap_values = explainer.shap_values(X=X.iloc[0:50, :], nsamples=100)
+
+    print("Shap len: ", len(shap_values))
+
+    shap.summary_plot(shap_values=shap_values[-1], features=X.iloc[0:50, :], show=False, sort=False)
+    plt.title(f"SNPs SHAP values in {model_name} for fold {fold}")
+    plt.tight_layout()
+    plt.savefig(f"{settings.save_dir}feature_shap_{model_name}_fold_{fold}.png")
+    plt.show()

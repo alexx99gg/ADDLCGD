@@ -2,7 +2,6 @@ import shap
 from pandas_plink import read_plink
 from sklearn import metrics
 from sklearn.decomposition import PCA
-from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score, precision_score, recall_score
 from sklearn.metrics import roc_curve
@@ -10,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 from sklearn.utils import shuffle
 from tensorflow.python.keras.callbacks import EarlyStopping
+from xgboost import XGBClassifier
 
 from plot_utils import *
 from read_data import *
@@ -49,6 +49,8 @@ for fold in folds:
     print(f"Fold number {fold}")
     clumped_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_train_p1_{settings.p1}.clumped"
     assoc_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_train.assoc.fisher"
+    # clumped_path = f"../wgs_data/cleaned/{settings.dataset}_p1_{settings.p1}.clumped"
+    # assoc_path = f"../wgs_data/cleaned/{settings.dataset}.assoc.fisher"
     train_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_train"
     test_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_test"
 
@@ -117,6 +119,8 @@ for fold in folds:
     DNN_recall_list.append(DNN_recall)
     print(f"DNN \t Precision {DNN_precision:.2f} \t Recall {DNN_recall:.2f} \t for fold {fold}")
 
+    plot_shap(DNN_model.predict, x_test, fold, 'DNN')
+
     # ----- Support Vector Machine -----
     # Generate and train model
     print("Creating SVM model...")
@@ -134,6 +138,8 @@ for fold in folds:
     SVM_recall = recall_score(y_test, SVM_y_test_pred)
     SVM_recall_list.append(SVM_recall)
     print(f"SVM \t Precision {SVM_precision:.2f} \t Recall {SVM_recall:.2f} \t for fold {fold}")
+
+    plot_shap(SVM_model.predict_proba, x_test, fold, 'SVM')
 
     # ----- Random Forest -----
     # Generate and train model
@@ -153,10 +159,12 @@ for fold in folds:
     RF_recall_list.append(RF_recall)
     print(f"RF \t Precision {RF_precision:.2f} \t Recall {RF_recall:.2f} \t for fold {fold}")
 
+    plot_shap(RF_model.predict_proba, x_test, fold, 'RF')
+
     # ----- Gradient Boosting -----
     # Generate and train model
     print("Creating GB model...")
-    GB_model = GradientBoostingClassifier()
+    GB_model = XGBClassifier(max_depth=3)
     GB_model.fit(x_train, y_train)
 
     print("Evaluate GB model...")
@@ -170,6 +178,9 @@ for fold in folds:
     GB_recall = recall_score(y_test, GB_y_test_pred)
     GB_recall_list.append(GB_recall)
     print(f"GB \t Precision {GB_precision:.2f} \t Recall {GB_recall:.2f} \t for fold {fold}")
+
+    plot_gb_importance(GB_model, selected_snp_names, fold)
+    plot_shap(GB_model.predict_proba, x_test, fold, 'GB')
 
     # ----- Calculate ROC curve ------
     DNN_auc_score = roc_auc_score(y_test, DNN_y_test_prob)

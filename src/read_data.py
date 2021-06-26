@@ -117,8 +117,8 @@ def generate_dataset(bed, bim, fam, snp_list):
     n_final_snps = x.shape[1]
     if n_final_snps > 0:
         x = (x - np.min(x)) / np.ptp(x)
-    # x = x[:, ~np.isnan(x).any(axis=0)] # Remove NaN values
 
+    # Convert to dataframe to assign names to variables
     x_dataframe = pd.DataFrame(data=x, columns=snp_list)
     return x_dataframe, y
 

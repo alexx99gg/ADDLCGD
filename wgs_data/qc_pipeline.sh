@@ -8,8 +8,8 @@
 # --hwe: Hardy-Weinberg equilibrium
 # --clump-p1: Significance threshold for index SNPs
 # --clump-r2: LD threshold for clumping
-directory="merged/"
-file="ADNI1GO23"
+directory="original/"
+file="ADNI1GO2"
 
 # Exclude non-white participants
 python3 ../src/exclude_non_white.py "${directory}${file}" ../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv ../demographic_data/PTDEMOG.csv "cleaned/${file}"
