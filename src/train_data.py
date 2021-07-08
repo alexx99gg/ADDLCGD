@@ -31,7 +31,7 @@ def create_MLP_model(n_SNPs: int):
     # Batch Normalization, Dropout Layer with 30% of inputs to drop,Gaussian Noise with 0.2 as Standard Deviation
     model.add(layers.BatchNormalization())
     model.add(layers.Dropout(0.4))
-    model.add(layers.GaussianNoise(0.2))
+    model.add(layers.GaussianNoise(0.3))
 
     # Dense Layer with 1024 outputs, ReLU as activation, L1 Regularization and He Initialization
     model.add(

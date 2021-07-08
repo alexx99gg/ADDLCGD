@@ -21,4 +21,7 @@ plink --bfile "cleaned/${file}" --make-bed --missing-genotype N --chr 1-22 --maf
 python3 ../src/generate_pheno.py "cleaned/${file}.fam" ../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv
 
 # Split data for k-fold and make association study
-python3 ../src/split_data.py "cleaned/${file}" 5 0.25 "subsets/${file}"
+#gwas_data_selection_list = ["train_fold", "all", "half_excluded"]
+gwas_data_selection="train_fold"
+
+python3 ../src/split_data.py --plink_path "cleaned/${file}" --splits 5 --out_file_folder "subsets${file}_${gwas_data_selection}/" --gwas_data_selection "${gwas_data_selection}"

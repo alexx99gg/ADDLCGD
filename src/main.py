@@ -47,17 +47,29 @@ folds = [1, 2, 3, 4, 5]
 for fold in folds:
     print()
     print(f"Fold number {fold}")
-    clumped_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_train_p1_{settings.p1}.clumped"
-    assoc_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_train.assoc.fisher"
-    # clumped_path = f"../wgs_data/cleaned/{settings.dataset}_p1_{settings.p1}.clumped"
-    # assoc_path = f"../wgs_data/cleaned/{settings.dataset}.assoc.fisher"
-    train_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_train"
-    test_path = f"{settings.dataset_path}{settings.dataset}_fold_{fold}_test"
+
+    gwas_data_selection = settings.gwas_data_selection
+    if gwas_data_selection == "train_fold":
+        clumped_path = f"{settings.dataset_folder}fold_{fold}_train_p1_{settings.p1}.clumped"
+        assoc_path = f"{settings.dataset_folder}fold_{fold}_train.assoc.fisher"
+    elif gwas_data_selection == "all":
+        clumped_path = f"../wgs_data/cleaned/{settings.dataset}_p1_{settings.p1}.clumped"
+        assoc_path = f"../wgs_data/cleaned/{settings.dataset}.assoc.fisher"
+    elif gwas_data_selection == "half_excluded":
+        clumped_path = f"{settings.dataset_folder}half_excluded_p1_{settings.p1}.clumped"
+        assoc_path = f"{settings.dataset_folder}half_excluded.assoc.fisher"
+    else:
+        exit(1)
+
+    train_path = f"{settings.dataset_folder}fold_{fold}_train"
+    test_path = f"{settings.dataset_folder}fold_{fold}_test"
 
     # Get SNPs to keep from clump file
     selected_snp_names, selected_snp_p_values = get_selected_snps(clumped_path)
     # Get the first ones
     plot_snp(selected_snp_names, selected_snp_p_values, fold)
+
+    # selected_snp_names = ["rs769449", "rs157582", "rs6045099", "rs1943440"]
 
     # Manhattan plot of assoc study
     plot_manhattan(assoc_path, fold)
@@ -119,7 +131,7 @@ for fold in folds:
     DNN_recall_list.append(DNN_recall)
     print(f"DNN \t Precision {DNN_precision:.2f} \t Recall {DNN_recall:.2f} \t for fold {fold}")
 
-    plot_shap(DNN_model.predict, x_train, x_test, fold, 'DNN')
+    plot_shap(DNN_model.predict, x_train, x_test, y_train, y_test, fold, 'DNN')
 
     # ----- Support Vector Machine -----
     # Generate and train model
@@ -139,7 +151,7 @@ for fold in folds:
     SVM_recall_list.append(SVM_recall)
     print(f"SVM \t Precision {SVM_precision:.2f} \t Recall {SVM_recall:.2f} \t for fold {fold}")
 
-    plot_shap(SVM_model.predict_proba, x_train, x_test, fold, 'SVM')
+    plot_shap(SVM_model.predict_proba, x_train, x_test, y_train, y_test, fold, 'SVM')
 
     # ----- Random Forest -----
     # Generate and train model
@@ -159,7 +171,7 @@ for fold in folds:
     RF_recall_list.append(RF_recall)
     print(f"RF \t Precision {RF_precision:.2f} \t Recall {RF_recall:.2f} \t for fold {fold}")
 
-    plot_shap(RF_model.predict_proba, x_train, x_test, fold, 'RF')
+    plot_shap(RF_model.predict_proba, x_train, x_test, y_train, y_test, fold, 'RF')
 
     # ----- Gradient Boosting -----
     # Generate and train model
@@ -180,7 +192,7 @@ for fold in folds:
     print(f"GB \t Precision {GB_precision:.2f} \t Recall {GB_recall:.2f} \t for fold {fold}")
 
     plot_gb_importance(GB_model, selected_snp_names, fold)
-    plot_shap(GB_model.predict_proba, x_train, x_test, fold, 'GB')
+    plot_shap(GB_model.predict_proba, x_train, x_test, y_train, y_test, fold, 'GB')
 
     # ----- Calculate ROC curve ------
     DNN_auc_score = roc_auc_score(y_test, DNN_y_test_prob)

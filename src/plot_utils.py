@@ -120,7 +120,7 @@ def plot_roc_curve(DNN_auc_score_list, DNN_tpr_matrix, SVM_auc_score_list, SVM_t
 
 def plot_snp(selected_snp_names, selected_snp_p_values, fold: int):
     fig, ax = plt.subplots()
-    ax.barh(selected_snp_names, selected_snp_p_values, color='blue', height=0.7)
+    ax.barh(selected_snp_names[:20], selected_snp_p_values[:20], color='blue', height=0.7)
     ax.invert_yaxis()
     plt.grid(axis='x')
     ax.set_xscale('log')
@@ -150,7 +150,10 @@ def plot_gb_importance(GB_model, selected_snp_names, fold: int):
     plt.show()
 
 
-def plot_shap(model, X_train, X_test, fold: int, model_name: str):
+def plot_shap(model, X_train, X_test, y_train, y_test, fold: int, model_name: str):
+    xmin = -0.75
+    xmax = 0.75
+
     X_train = X_train.iloc[:50, :]
 
     explainer = shap.KernelExplainer(model=model, data=X_train, link="identity")
@@ -159,11 +162,49 @@ def plot_shap(model, X_train, X_test, fold: int, model_name: str):
     if isinstance(shap_values, list):
         shap_values = shap_values[-1]
 
-    shap.summary_plot(shap_values=shap_values, features=X_test, show=False, sort=False)
+    shap.summary_plot(shap_values=shap_values, features=X_test, show=False, plot_type="violin")
+    plt.xlim(xmin=xmin, xmax=xmax)
     plt.title(f"SNPs SHAP values in {model_name} for fold {fold}")
     plt.tight_layout()
     plt.savefig(f"{settings.save_dir}feature_shap_{model_name}_fold_{fold}.png")
     plt.show()
+
+    n_test = len(X_test)
+    i_test_CN = [False] * n_test
+    i_test_AD = [False] * n_test
+    for i in range(n_test):
+        if y_test[i] == 0:
+            i_test_CN[i] = True
+        else:
+            i_test_AD[i] = True
+            
+    shap_values_CN = shap_values[i_test_CN, :]
+    X_test_CN = X_test.iloc[i_test_CN, :]
+    
+    shap_values_AD = shap_values[i_test_AD, :]
+    X_test_AD = X_test.iloc[i_test_AD, :]
+
+    shap.summary_plot(shap_values=shap_values_CN, features=X_test_CN, show=False)
+    plt.xlim(xmin=xmin, xmax=xmax)
+    plt.title(f"SNPs CN SHAP values in {model_name} for fold {fold}")
+    plt.tight_layout()
+    plt.savefig(f"{settings.save_dir}feature_shap_CN_{model_name}_fold_{fold}.png")
+    plt.show()
+
+    shap.summary_plot(shap_values=shap_values_AD, features=X_test_AD, show=False)
+    plt.xlim(xmin=xmin, xmax=xmax)
+    plt.title(f"SNPs AD SHAP values in {model_name} for fold {fold}")
+    plt.tight_layout()
+    plt.savefig(f"{settings.save_dir}feature_shap_AD_{model_name}_fold_{fold}.png")
+    plt.show()
+
+
+
+    # shap.summary_plot(shap_values=shap_values, features=X_test, plot_type="bar", max_display=25, class_names=['CN', 'AD'], show=False, color_bar='blue')
+    # plt.title(f"SNPs SHAP values in {model_name} for fold {fold}")
+    # plt.tight_layout()
+    # plt.savefig(f"{settings.save_dir}feature_shap_{model_name}_fold_{fold}.png")
+    # plt.show()
 
     # variable = X_test.columns[0]
     # shap.dependence_plot(variable, shap_values, X_test)
