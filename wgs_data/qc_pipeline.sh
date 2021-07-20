@@ -24,4 +24,4 @@ python3 ../src/generate_pheno.py "cleaned/${file}.fam" ../diagnosis_data/DXSUM_P
 #gwas_data_selection_list = ["train_fold", "all", "half_excluded"]
 gwas_data_selection="train_fold"
 
-python3 ../src/split_data.py --plink_path "cleaned/${file}" --splits 5 --out_file_folder "subsets${file}_${gwas_data_selection}/" --gwas_data_selection "${gwas_data_selection}"
+python3 ../src/split_data.py --plink_path "cleaned/${file}" --splits 2 --out_file_folder "subsets${file}_${gwas_data_selection}/" --gwas_data_selection "${gwas_data_selection}"

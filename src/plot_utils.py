@@ -177,10 +177,10 @@ def plot_shap(model, X_train, X_test, y_train, y_test, fold: int, model_name: st
             i_test_CN[i] = True
         else:
             i_test_AD[i] = True
-            
+
     shap_values_CN = shap_values[i_test_CN, :]
     X_test_CN = X_test.iloc[i_test_CN, :]
-    
+
     shap_values_AD = shap_values[i_test_AD, :]
     X_test_AD = X_test.iloc[i_test_AD, :]
 
@@ -197,8 +197,6 @@ def plot_shap(model, X_train, X_test, y_train, y_test, fold: int, model_name: st
     plt.tight_layout()
     plt.savefig(f"{settings.save_dir}feature_shap_AD_{model_name}_fold_{fold}.png")
     plt.show()
-
-
 
     # shap.summary_plot(shap_values=shap_values, features=X_test, plot_type="bar", max_display=25, class_names=['CN', 'AD'], show=False, color_bar='blue')
     # plt.title(f"SNPs SHAP values in {model_name} for fold {fold}")

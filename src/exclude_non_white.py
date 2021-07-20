@@ -1,10 +1,11 @@
 import sys
 
+import dask
 import pandas as pd
 from pandas_plink import read_plink1_bin, write_plink1_bin
 
-import dask
 dask.config.set({"array.slicing.split_large_chunks": False})
+
 
 def main(argv):
     # read params

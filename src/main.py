@@ -1,4 +1,3 @@
-import shap
 from pandas_plink import read_plink
 from sklearn import metrics
 from sklearn.decomposition import PCA
@@ -55,9 +54,9 @@ for fold in folds:
     elif gwas_data_selection == "all":
         clumped_path = f"../wgs_data/cleaned/{settings.dataset}_p1_{settings.p1}.clumped"
         assoc_path = f"../wgs_data/cleaned/{settings.dataset}.assoc.fisher"
-    elif gwas_data_selection == "half_excluded":
-        clumped_path = f"{settings.dataset_folder}half_excluded_p1_{settings.p1}.clumped"
-        assoc_path = f"{settings.dataset_folder}half_excluded.assoc.fisher"
+    elif gwas_data_selection == "part_excluded":
+        clumped_path = f"{settings.dataset_folder}part_excluded_p1_{settings.p1}.clumped"
+        assoc_path = f"{settings.dataset_folder}part_excluded.assoc.fisher"
     else:
         exit(1)
 

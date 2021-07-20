@@ -1,5 +1,4 @@
 import sys
-import pandas as pd
 
 from read_data import *
 
@@ -17,7 +16,7 @@ def main(argv):
 
     # Read file
     file = pd.read_csv(fam_file, names=['FID', 'IID', 'father', 'mother', 'sex', 'phenotype'], index_col='IID',
-                           delimiter=' ')
+                       delimiter=' ')
 
     out_file = open(fam_file, 'w+')
     n_CN = 0
