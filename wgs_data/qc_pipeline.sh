@@ -21,7 +21,9 @@ plink --bfile "cleaned/${file}" --make-bed --missing-genotype N --chr 1-22 --maf
 python3 ../src/generate_pheno.py "cleaned/${file}.fam" ../diagnosis_data/DXSUM_PDXCONV_ADNIALL.csv
 
 # Split data for k-fold and make association study
-#gwas_data_selection_list = ["train_fold", "all", "half_excluded"]
-gwas_data_selection="train_fold"
+#selection_method_list = ["train_fold", "leakage", "split"]
 
-python3 ../src/split_data.py --plink_path "cleaned/${file}" --splits 2 --out_file_folder "subsets${file}_${gwas_data_selection}/" --gwas_data_selection "${gwas_data_selection}"
+python3 ../src/split_data.py --plink_path "cleaned/${file}" --selection_method train_fold --folds 5 --out_file_folder "processed/${file}-selection_method_train_fold/"
+python3 ../src/split_data.py --plink_path "cleaned/${file}" --selection_method split --gwas_ratio 0.8 --folds 5 --out_file_folder "processed/${file}-selection_method_split-gwas_ratio_0.8/"
+python3 ../src/split_data.py --plink_path "cleaned/${file}" --selection_method split --gwas_ratio 0.5 --folds 5 --out_file_folder "processed/${file}-selection_method_split-gwas_ratio_0.5/"
+python3 ../src/split_data.py --plink_path "cleaned/${file}" --selection_method leakage --folds 5 --out_file_folder "processed/${file}-selection_method_leakage/"

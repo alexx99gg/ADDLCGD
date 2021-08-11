@@ -47,17 +47,18 @@ for fold in folds:
     print()
     print(f"Fold number {fold}")
 
-    gwas_data_selection = settings.gwas_data_selection
-    if gwas_data_selection == "train_fold":
+    selection_method = settings.selection_method
+    if selection_method == "train_fold":
         clumped_path = f"{settings.dataset_folder}fold_{fold}_train_p1_{settings.p1}.clumped"
         assoc_path = f"{settings.dataset_folder}fold_{fold}_train.assoc.fisher"
-    elif gwas_data_selection == "all":
-        clumped_path = f"../wgs_data/cleaned/{settings.dataset}_p1_{settings.p1}.clumped"
-        assoc_path = f"../wgs_data/cleaned/{settings.dataset}.assoc.fisher"
-    elif gwas_data_selection == "part_excluded":
-        clumped_path = f"{settings.dataset_folder}part_excluded_p1_{settings.p1}.clumped"
-        assoc_path = f"{settings.dataset_folder}part_excluded.assoc.fisher"
+    elif selection_method == "split":
+        clumped_path = f"{settings.dataset_folder}gwas_p1_{settings.p1}.clumped"
+        assoc_path = f"{settings.dataset_folder}gwas.assoc.fisher"
+    elif selection_method == "leakage":
+        clumped_path = f"{settings.dataset_folder}all_p1_{settings.p1}.clumped"
+        assoc_path = f"{settings.dataset_folder}all.assoc.fisher"
     else:
+        print(f"ERROR: selection method not recognized {selection_method}")
         exit(1)
 
     train_path = f"{settings.dataset_folder}fold_{fold}_train"
@@ -67,8 +68,6 @@ for fold in folds:
     selected_snp_names, selected_snp_p_values = get_selected_snps(clumped_path)
     # Get the first ones
     plot_snp(selected_snp_names, selected_snp_p_values, fold)
-
-    # selected_snp_names = ["rs769449", "rs157582", "rs6045099", "rs1943440"]
 
     # Manhattan plot of assoc study
     plot_manhattan(assoc_path, fold)
@@ -190,7 +189,6 @@ for fold in folds:
     GB_recall_list.append(GB_recall)
     print(f"GB \t Precision {GB_precision:.2f} \t Recall {GB_recall:.2f} \t for fold {fold}")
 
-    plot_gb_importance(GB_model, selected_snp_names, fold)
     plot_shap(GB_model.predict_proba, x_train, x_test, y_train, y_test, fold, 'GB')
 
     # ----- Calculate ROC curve ------

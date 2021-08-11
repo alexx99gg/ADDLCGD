@@ -3,13 +3,18 @@ import os
 dataset = "ADNI1GO2"
 
 p1_list = [5e-8, 1e-5, 1e-4, 1e-3, 1e-2]
-p1 = 1e-4
+p1 = 5e-8
 
-gwas_data_selection_list = ["train_fold", "all", "part_excluded"]
-gwas_data_selection = "train_fold"
+selection_method_list = ["train_fold", "leakage", "split"]
+selection_method = "leakage"
 
-dataset_folder = f"../wgs_data/subsets{dataset}_{gwas_data_selection}/"
+dataset_folder = f"../wgs_data/processed/{dataset}-selection_method_{selection_method}/"
+save_dir = f"../results/dataset_{dataset}-p1_{p1:.0e}-selection_method_{selection_method}/"
 
-save_dir = f"../results/dataset_{dataset}_p1_{p1}_selection_{gwas_data_selection}/"
+if selection_method == "split":
+    gwas_ratio = 0.8
+    dataset_folder = f"../wgs_data/processed/{dataset}-selection_method_{selection_method}-gwas_ratio_{gwas_ratio}/"
+    save_dir = f"../results/dataset_{dataset}-p1_{p1:.0e}-selection_method_{selection_method}-gwas_ratio_{gwas_ratio}/"
+
 if not os.path.exists(save_dir):
     os.makedirs(save_dir)

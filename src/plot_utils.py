@@ -138,18 +138,6 @@ def plot_manhattan(assoc_path, fold):
                     cmap_var=7)
 
 
-def plot_gb_importance(GB_model, selected_snp_names, fold: int):
-    fig, ax = plt.subplots()
-    plt.barh(selected_snp_names, GB_model.feature_importances_, color='blue', height=0.7)
-    ax.invert_yaxis()
-    plt.title(f"SNPs importances in GB for fold {fold}")
-    ax.set_xlabel('Importance')
-    ax.set_ylabel('SNP name')
-    plt.tight_layout()
-    plt.savefig(f"{settings.save_dir}feature_importance_gb_fold_{fold}.png")
-    plt.show()
-
-
 def plot_shap(model, X_train, X_test, y_train, y_test, fold: int, model_name: str):
     xmin = -0.75
     xmax = 0.75
@@ -169,6 +157,8 @@ def plot_shap(model, X_train, X_test, y_train, y_test, fold: int, model_name: st
     plt.savefig(f"{settings.save_dir}feature_shap_{model_name}_fold_{fold}.png")
     plt.show()
 
+
+""""
     n_test = len(X_test)
     i_test_CN = [False] * n_test
     i_test_AD = [False] * n_test
@@ -197,12 +187,4 @@ def plot_shap(model, X_train, X_test, y_train, y_test, fold: int, model_name: st
     plt.tight_layout()
     plt.savefig(f"{settings.save_dir}feature_shap_AD_{model_name}_fold_{fold}.png")
     plt.show()
-
-    # shap.summary_plot(shap_values=shap_values, features=X_test, plot_type="bar", max_display=25, class_names=['CN', 'AD'], show=False, color_bar='blue')
-    # plt.title(f"SNPs SHAP values in {model_name} for fold {fold}")
-    # plt.tight_layout()
-    # plt.savefig(f"{settings.save_dir}feature_shap_{model_name}_fold_{fold}.png")
-    # plt.show()
-
-    # variable = X_test.columns[0]
-    # shap.dependence_plot(variable, shap_values, X_test)
+"""
