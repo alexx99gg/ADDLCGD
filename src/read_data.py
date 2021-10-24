@@ -57,7 +57,7 @@ def print_diagnostic_dict_summary(diagnostic_dict: dict):
           f"Number of AD patients: {n_AD}\n")
 
 
-def generate_dataset(bed, bim, fam, snp_list):
+def generate_dataset(bed, bim, fam, snp_name_list):
     n_wgs_samples = bed.shape[1]
     n_snps = bed.shape[0]
     y = []
@@ -88,17 +88,26 @@ def generate_dataset(bed, bim, fam, snp_list):
 
     # Keep SNPs in snp_list only
     snps_to_keep = [False] * n_snps
-    for snp in snp_list:
+    snp_name_list_found = [False] * len(snp_name_list)
+    i = 0
+    n_snps_not_found = 0
+    for snp in snp_name_list:
         index = bim[bim['snp'] == snp].index
         if len(index) == 0:
-            print(f"ERROR: SNP from keep list not found: {snp}")
-            exit(1)
+            print(f"WARNING: SNP from keep list not found: {snp}")
+            n_snps_not_found += 1
+            i += 1
+            continue
         index = index[0]
         snps_to_keep[index] = True
+        snp_name_list_found[i] = True
+        i += 1
 
     # Filtering
     bed = bed[:, samples_to_keep]
     bed = bed[snps_to_keep, :]
+    snp_name_list = np.asarray(snp_name_list)
+    snp_name_list = snp_name_list[snp_name_list_found]
 
     x = np.asarray(bed)
     x = x.transpose((1, 0))
@@ -107,6 +116,8 @@ def generate_dataset(bed, bim, fam, snp_list):
     n_NaN = np.count_nonzero(np.isnan(x))
     if n_NaN > 0:
         print(f"WARNING: number of missing genotypes in samples: {n_NaN}\n")
+    if n_snps_not_found > 0:
+        print(f"Warning: number of SNPs from keep list npt found: {n_snps_not_found}")
     # Change NaN values
     #   0 -> First allele
     #   1 -> Heterozygous
@@ -119,7 +130,7 @@ def generate_dataset(bed, bim, fam, snp_list):
         x = (x - np.min(x)) / np.ptp(x)
 
     # Convert to dataframe to assign names to variables
-    x_dataframe = pd.DataFrame(data=x, columns=snp_list)
+    x_dataframe = pd.DataFrame(data=x, columns=snp_name_list)
     return x_dataframe, y
 
 

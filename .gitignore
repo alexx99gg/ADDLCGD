@@ -135,4 +135,12 @@ dmypy.json
 /wgs_data/cleaned/
 /wgs_data/merged/
 /wgs_data/subsets/
+/wgs_data/original/
+/wgs_data/original_no_fam
+/wgs_data/processed
 
+# Diagnosis data
+/diagnosis_data
+
+# Demographic data
+/demographic_data

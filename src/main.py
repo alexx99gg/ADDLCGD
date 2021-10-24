@@ -12,6 +12,7 @@ from xgboost import XGBClassifier
 
 from plot_utils import *
 from read_data import *
+from snps_lists.snps_lists import snpedia_snp_list, PMC4876682_snp_list, tfg_eduardo_snp_list
 from train_data import *
 
 print(f"Reading dataset {settings.dataset}")
@@ -57,6 +58,16 @@ for fold in folds:
     elif selection_method == "leakage":
         clumped_path = f"{settings.dataset_folder}all_p1_{settings.p1}.clumped"
         assoc_path = f"{settings.dataset_folder}all.assoc.fisher"
+    elif selection_method == "external_study":
+        if settings.snp_source == "snpedia_snp_list":
+            selected_snp_names = snpedia_snp_list
+        elif settings.snp_source == "PMC4876682_snp_list":
+            selected_snp_names = PMC4876682_snp_list
+        elif settings.snp_source == "tfg_eduardo_snp_list":
+            selected_snp_names = tfg_eduardo_snp_list
+        else:
+            print(f"ERROR: SNP list source not recognized: {settings.snp_source}")
+        print(f"Number of SNPs loaded from {settings.snp_source}: {len(selected_snp_names)}")
     else:
         print(f"ERROR: selection method not recognized {selection_method}")
         exit(1)
@@ -64,13 +75,17 @@ for fold in folds:
     train_path = f"{settings.dataset_folder}fold_{fold}_train"
     test_path = f"{settings.dataset_folder}fold_{fold}_test"
 
-    # Get SNPs to keep from clump file
-    selected_snp_names, selected_snp_p_values = get_selected_snps(clumped_path)
-    # Get the first ones
-    plot_snp(selected_snp_names, selected_snp_p_values, fold)
+    if selection_method != "external_study":
+        # Get SNPs to keep from clump file
+        selected_snp_names, selected_snp_p_values = get_selected_snps(clumped_path)
 
-    # Manhattan plot of assoc study
-    plot_manhattan(assoc_path, fold)
+    if selection_method == "train_fold" or (selection_method != "external_study" and fold == 1):
+
+        # Plot p values of top 20 SNPs
+        plot_snp(selected_snp_names, selected_snp_p_values, fold)
+
+        # Manhattan plot of assoc study
+        plot_manhattan(assoc_path, fold)
 
     # Load train data
     (bim, fam, bed) = read_plink(train_path, verbose=False)
@@ -129,7 +144,8 @@ for fold in folds:
     DNN_recall_list.append(DNN_recall)
     print(f"DNN \t Precision {DNN_precision:.2f} \t Recall {DNN_recall:.2f} \t for fold {fold}")
 
-    plot_shap(DNN_model.predict, x_train, x_test, y_train, y_test, fold, 'DNN')
+    if n_train_SNPs > 10:
+        plot_shap(DNN_model.predict, x_train, x_test, y_train, y_test, fold, 'DNN')
 
     # ----- Support Vector Machine -----
     # Generate and train model
@@ -149,7 +165,8 @@ for fold in folds:
     SVM_recall_list.append(SVM_recall)
     print(f"SVM \t Precision {SVM_precision:.2f} \t Recall {SVM_recall:.2f} \t for fold {fold}")
 
-    plot_shap(SVM_model.predict_proba, x_train, x_test, y_train, y_test, fold, 'SVM')
+    if n_train_SNPs > 10:
+        plot_shap(SVM_model.predict_proba, x_train, x_test, y_train, y_test, fold, 'SVM')
 
     # ----- Random Forest -----
     # Generate and train model
@@ -169,7 +186,8 @@ for fold in folds:
     RF_recall_list.append(RF_recall)
     print(f"RF \t Precision {RF_precision:.2f} \t Recall {RF_recall:.2f} \t for fold {fold}")
 
-    plot_shap(RF_model.predict_proba, x_train, x_test, y_train, y_test, fold, 'RF')
+    if n_train_SNPs > 10:
+        plot_shap(RF_model.predict_proba, x_train, x_test, y_train, y_test, fold, 'RF')
 
     # ----- Gradient Boosting -----
     # Generate and train model
@@ -189,7 +207,8 @@ for fold in folds:
     GB_recall_list.append(GB_recall)
     print(f"GB \t Precision {GB_precision:.2f} \t Recall {GB_recall:.2f} \t for fold {fold}")
 
-    plot_shap(GB_model.predict_proba, x_train, x_test, y_train, y_test, fold, 'GB')
+    if n_train_SNPs > 10:
+        plot_shap(GB_model.predict_proba, x_train, x_test, y_train, y_test, fold, 'GB')
 
     # ----- Calculate ROC curve ------
     DNN_auc_score = roc_auc_score(y_test, DNN_y_test_prob)
