@@ -109,6 +109,8 @@ def generate_dataset(bed, bim, fam, snp_name_list):
     snp_name_list = np.asarray(snp_name_list)
     snp_name_list = snp_name_list[snp_name_list_found]
 
+    print(f"SNPs found in dataset: {snp_name_list}")
+
     x = np.asarray(bed)
     x = x.transpose((1, 0))
 

@@ -50,13 +50,13 @@ for fold in folds:
 
     selection_method = settings.selection_method
     if selection_method == "train_fold":
-        clumped_path = f"{settings.dataset_folder}fold_{fold}_train_p1_{settings.p1}.clumped"
+        clumped_path = f"{settings.dataset_folder}fold_{fold}_train_p1_{settings.p1:.0e}.clumped"
         assoc_path = f"{settings.dataset_folder}fold_{fold}_train.assoc.fisher"
     elif selection_method == "split":
-        clumped_path = f"{settings.dataset_folder}gwas_p1_{settings.p1}.clumped"
+        clumped_path = f"{settings.dataset_folder}gwas_p1_{settings.p1:.0e}.clumped"
         assoc_path = f"{settings.dataset_folder}gwas.assoc.fisher"
     elif selection_method == "leakage":
-        clumped_path = f"{settings.dataset_folder}all_p1_{settings.p1}.clumped"
+        clumped_path = f"{settings.dataset_folder}all_p1_{settings.p1:.0e}.clumped"
         assoc_path = f"{settings.dataset_folder}all.assoc.fisher"
     elif selection_method == "external_study":
         if settings.snp_source == "snpedia_snp_list":
@@ -68,6 +68,7 @@ for fold in folds:
         else:
             print(f"ERROR: SNP list source not recognized: {settings.snp_source}")
         print(f"Number of SNPs loaded from {settings.snp_source}: {len(selected_snp_names)}")
+        print(f"List of SNPs loaded from {settings.snp_source}: {selected_snp_names}")
     else:
         print(f"ERROR: selection method not recognized {selection_method}")
         exit(1)
@@ -144,7 +145,7 @@ for fold in folds:
     DNN_recall_list.append(DNN_recall)
     print(f"DNN \t Precision {DNN_precision:.2f} \t Recall {DNN_recall:.2f} \t for fold {fold}")
 
-    if n_train_SNPs > 10:
+    if n_train_SNPs > 3:
         plot_shap(DNN_model.predict, x_train, x_test, y_train, y_test, fold, 'DNN')
 
     # ----- Support Vector Machine -----
@@ -165,7 +166,7 @@ for fold in folds:
     SVM_recall_list.append(SVM_recall)
     print(f"SVM \t Precision {SVM_precision:.2f} \t Recall {SVM_recall:.2f} \t for fold {fold}")
 
-    if n_train_SNPs > 10:
+    if n_train_SNPs > 3:
         plot_shap(SVM_model.predict_proba, x_train, x_test, y_train, y_test, fold, 'SVM')
 
     # ----- Random Forest -----
@@ -186,7 +187,7 @@ for fold in folds:
     RF_recall_list.append(RF_recall)
     print(f"RF \t Precision {RF_precision:.2f} \t Recall {RF_recall:.2f} \t for fold {fold}")
 
-    if n_train_SNPs > 10:
+    if n_train_SNPs > 3:
         plot_shap(RF_model.predict_proba, x_train, x_test, y_train, y_test, fold, 'RF')
 
     # ----- Gradient Boosting -----
@@ -207,7 +208,7 @@ for fold in folds:
     GB_recall_list.append(GB_recall)
     print(f"GB \t Precision {GB_precision:.2f} \t Recall {GB_recall:.2f} \t for fold {fold}")
 
-    if n_train_SNPs > 10:
+    if n_train_SNPs > 3:
         plot_shap(GB_model.predict_proba, x_train, x_test, y_train, y_test, fold, 'GB')
 
     # ----- Calculate ROC curve ------

@@ -150,41 +150,15 @@ def plot_shap(model, X_train, X_test, y_train, y_test, fold: int, model_name: st
     if isinstance(shap_values, list):
         shap_values = shap_values[-1]
 
-    shap.summary_plot(shap_values=shap_values, features=X_test, show=False, plot_type="violin")
-    plt.xlim(xmin=xmin, xmax=xmax)
-    plt.title(f"SNPs SHAP values in {model_name} for fold {fold}")
-    plt.tight_layout()
-    plt.savefig(f"{settings.save_dir}feature_shap_{model_name}_fold_{fold}.png")
-    plt.show()
+    try:
 
+        shap.summary_plot(shap_values=shap_values, features=X_test, show=False, plot_type="violin")
+        plt.xlim(xmin=xmin, xmax=xmax)
+        plt.title(f"SNPs SHAP values in {model_name} for fold {fold}")
+        plt.tight_layout()
+        plt.savefig(f"{settings.save_dir}feature_shap_{model_name}_fold_{fold}.png")
+        plt.show()
+    except np.linalg.LinAlgError:
+        print(f"WARNING: can't calculate SHAP values in {model_name} for fold {fold}")
+        pass
 
-""""
-    n_test = len(X_test)
-    i_test_CN = [False] * n_test
-    i_test_AD = [False] * n_test
-    for i in range(n_test):
-        if y_test[i] == 0:
-            i_test_CN[i] = True
-        else:
-            i_test_AD[i] = True
-
-    shap_values_CN = shap_values[i_test_CN, :]
-    X_test_CN = X_test.iloc[i_test_CN, :]
-
-    shap_values_AD = shap_values[i_test_AD, :]
-    X_test_AD = X_test.iloc[i_test_AD, :]
-
-    shap.summary_plot(shap_values=shap_values_CN, features=X_test_CN, show=False)
-    plt.xlim(xmin=xmin, xmax=xmax)
-    plt.title(f"SNPs CN SHAP values in {model_name} for fold {fold}")
-    plt.tight_layout()
-    plt.savefig(f"{settings.save_dir}feature_shap_CN_{model_name}_fold_{fold}.png")
-    plt.show()
-
-    shap.summary_plot(shap_values=shap_values_AD, features=X_test_AD, show=False)
-    plt.xlim(xmin=xmin, xmax=xmax)
-    plt.title(f"SNPs AD SHAP values in {model_name} for fold {fold}")
-    plt.tight_layout()
-    plt.savefig(f"{settings.save_dir}feature_shap_AD_{model_name}_fold_{fold}.png")
-    plt.show()
-"""
